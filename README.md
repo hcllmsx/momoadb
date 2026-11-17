@@ -55,7 +55,7 @@
 - DataStore
 - OkHttp
 
-详细实现、构建验证和维护规范见 [项目文档](docs/README.md)。
+详细实现、构建验证和维护规范见 [开发文档](docs/DEVELOPMENT.md)。
 
 ## 致谢
 

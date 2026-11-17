@@ -1,4 +1,4 @@
-# 默默ADB 项目文档
+# 默默ADB 开发文档
 
 本文档基于当前源码实际状态整理，用于说明 默默ADB 的功能范围、项目结构、开发规范、维护规范和性能要求。后续开发应在功能或工程结构变化后同步更新本文档。
 
@@ -100,8 +100,7 @@ momoadb/
 │       │   ├── MainActivity.kt  # 遥控器友好的单页界面
 │       │   └── adb/             # ADB 协议、RSA 认证与 shell 执行
 │       └── res/                 # 布局、焦点态与电视横幅
-├── docs/README.md               # 当前实现与开发维护规范
-├── docs/img/                    # README 使用的预览图片
+├── docs/DEVELOPMENT.md          # 当前实现与开发维护规范
 ├── gradle/libs.versions.toml    # 依赖版本
 ├── gradle/wrapper/              # 固定版本与 SHA-256 的 Gradle Wrapper
 ├── build.gradle.kts
@@ -261,7 +260,11 @@ git diff --check
 
 `FastbootUiTest` 默认只查询和复制结果。显式传入 instrumentation 参数 `fastbootReboot=bootloader` 或 `fastbootReboot=system` 时额外验证对应重启按钮及会话清理，测试结束后目标设备停留在所选模式。额外传入 `fastbootPrepare=true` 可从已授权的 USB ADB 目标重启到 Bootloader，再执行本轮测试；未显式指定时不会切换目标模式。
 
-Debug 使用本地调试签名；未配置发布签名时，本地 Release APK 为未签名产物。Release 使用 R8 混淆和资源收缩。
+Debug 使用本地调试签名（Android Debug 证书）；未配置发布签名时，本地 Release APK 为未签名产物。Release 使用 R8 混淆和资源收缩。
+
+调试版 APK 明显大于正式版属于预期：Debug 不走 R8、不做资源收缩，类按原样拆成多个 dex（26.11.17 标准版 21 个 dex，未压缩约 74 MB），并额外打包 Compose 预览工具 `ui-tooling`；Release 收缩后只剩单个 dex。同版本标准版二者分别为 27 MB 与 4.1 MB，判断安装包体积只看 `out_put` 根目录的 Release 产物。
+
+调试版固定带 Dev 标识，便于安装后与正式版区分：桌面名为「默默ADB Dev」/「默默ADB 轻量版 Dev」（`app/src/debug/res/`、`lite/src/debug/res/` 覆盖 `app_name`），`versionName` 追加 `-dev`（`buildTypes.debug.versionNameSuffix`）。正式版无论由本地菜单还是 CI 构建都不包含这些覆盖。更新检查在比较前会剥离 `-dev` 后缀，不会把同一版本的正式 Release 判成新版本。两侧签名证书不同，调试版无法覆盖安装正式版，需先卸载。
 
 ## 发布规范
 

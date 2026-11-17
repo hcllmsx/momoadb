@@ -114,13 +114,14 @@ jobs:
           cp "${LITE_APK_PATH}" "momoadb-lite-${RELEASE_TAG#v}.apk"
           APK_PATH="momoadb-${RELEASE_TAG#v}.apk"
           LITE_APK_PATH="momoadb-lite-${RELEASE_TAG#v}.apk"
-          RELEASE_TITLE="momoadb ${RELEASE_TAG}"
+          RELEASE_TITLE="默默ADB ${RELEASE_TAG}"
           CURRENT_TAG="${RELEASE_TAG}"
           PREVIOUS_TAG="$(git tag --list 'v[0-9]*.[0-9]*.[0-9]*' --sort=-v:refname | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' | grep -v "^${CURRENT_TAG}$" | head -n 1 || true)"
           if [[ -n "${PREVIOUS_TAG}" ]]; then
             RANGE="${PREVIOUS_TAG}..HEAD"
           else
-            RANGE="HEAD"
+            # 首次发布没有上一个标签：只取本次提交，避免把继承来的全部历史都写进说明。
+            RANGE="HEAD~1..HEAD"
           fi
           CHANGELOG="$(git log "${RANGE}" --no-merges --pretty=format:'%s%x09%h' | awk -F '\t' '!seen[$1]++ { printf "- %s (%s)\n", $1, $2 }' || true)"
           if [[ -z "${CHANGELOG}" ]]; then

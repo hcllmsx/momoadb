@@ -27,8 +27,10 @@ class ScrcpyAudioDecoder(private val stream: AdbStream, private val codecId: Int
             val header = ByteArray(ScrcpyProtocol.PacketHeaderLength)
             val fields = ByteBuffer.wrap(header).order(ByteOrder.BIG_ENDIAN)
             try {
-                // 0/1 are scrcpy's disabled/failed audio handshake sentinels, not codecs.
-                if (codecId == 0 || codecId == 1) return@withContext
+                // 0 = 设备未启用音频，属正常情况，静默返回。
+                if (codecId == 0) return@withContext
+                // 1 = 设备音频采集启动失败。抛出让会话上报，否则用户只会看到「画面正常但没声音」。
+                check(codecId != 1) { "Device audio capture failed" }
                 while (running) {
                     currentCoroutineContext().ensureActive()
                     stream.source.readFully(header)

@@ -29,6 +29,8 @@ data class MirrorUiState(
     val status: OperationStatus = OperationStatus.Idle,
     val videoWidth: Int = 0,
     val videoHeight: Int = 0,
+    /** 音频流失败提示：视频继续，但要让用户知道为什么没有声音。 */
+    val audioError: String? = null,
 )
 
 class MirrorViewModel(
@@ -110,6 +112,13 @@ class MirrorViewModel(
                                                 error.message
                                                     ?: appString(R.string.mirror_reenter_hint),
                                         )
+                                )
+                            }
+                        },
+                        onAudioError = {
+                            state.update { snapshot ->
+                                snapshot.copy(
+                                    audioError = appString(R.string.scrcpy_audio_stream_error)
                                 )
                             }
                         },

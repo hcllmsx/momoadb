@@ -68,13 +68,15 @@ class InstallApkViewModel(
                     return@launch
                 }
             if (selectedUri != uri) return@launch
+            // 下载管理器遇到重名会存成 app.apk.1 / app.apk.2，这类文件同样是可安装的 APK。
+            val isApk = isApkFileName(name)
             state.update { snapshot ->
                 snapshot.copy(
                     selectedName = name,
                     selectedUriText = uri.toString(),
-                    installEnabled = name.endsWith(".apk", ignoreCase = true),
+                    installEnabled = isApk,
                     operationStatus =
-                        if (name.endsWith(".apk", ignoreCase = true)) {
+                        if (isApk) {
                             OperationStatus.Idle
                         } else {
                             OperationStatus.Failed(
@@ -197,3 +199,10 @@ class InstallApkViewModel(
         }
     }
 }
+
+/**
+ * 判断文件名是否为可安装的 APK。
+ *
+ * 除标准 `.apk` 外，还接受下载管理器遇到重名时追加的数字后缀（`app.apk.1`、`app.apk.2`）。
+ */
+internal fun isApkFileName(name: String): Boolean = name.matches(Regex("(?i).*\\.apk(?:\\.[0-9]+)?"))

@@ -160,6 +160,22 @@ fun MirrorScreen(
             },
         )
 
+        // 音频失败只影响声音，镜像继续；给一行提示说明原因，避免用户以为是设备静音。
+        uiState.audioError?.let { message ->
+            Text(
+                text = message,
+                modifier =
+                    Modifier
+                        .align(Alignment.TopCenter)
+                        .statusBarsPadding()
+                        .padding(top = 64.dp, start = 16.dp, end = 16.dp)
+                        .background(Color.Black.copy(alpha = 0.6f), RoundedCornerShape(8.dp))
+                        .padding(horizontal = 12.dp, vertical = 6.dp),
+                color = Color.White,
+                style = MaterialTheme.typography.bodySmall,
+            )
+        }
+
         AnimatedVisibility(
             visible = controlsVisible,
             modifier = Modifier.align(Alignment.BottomCenter),

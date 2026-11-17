@@ -398,6 +398,7 @@
 
     <!-- Scrcpy mirroring -->
     <string name="scrcpy_video_stream_error">屏幕镜像视频流异常</string>
+    <string name="scrcpy_audio_stream_error">设备音频采集失败，镜像继续但无声音</string>
     <string name="scrcpy_start_failed">屏幕镜像启动失败</string>
     <string name="scrcpy_start_failed_fallback_suggestion">请查看设置里的诊断日志。</string>
     <string name="scrcpy_control_disconnected_suggestion">镜像连接可能已断开，请重新进入屏幕镜像。</string>

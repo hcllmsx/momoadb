@@ -398,6 +398,7 @@
 
     <!-- Scrcpy mirroring -->
     <string name="scrcpy_video_stream_error">Screen mirroring video stream error</string>
+    <string name="scrcpy_audio_stream_error">Device audio capture failed; mirroring continues without sound</string>
     <string name="scrcpy_start_failed">Failed to start screen mirroring</string>
     <string name="scrcpy_start_failed_fallback_suggestion">Check the diagnostic logs in Settings.</string>
     <string name="scrcpy_control_disconnected_suggestion">The mirroring connection may have dropped. Please re-enter screen mirroring.</string>

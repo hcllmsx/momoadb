@@ -58,7 +58,7 @@ fun InstallApkScreen(
         bottomPadding = bottomPadding,
         uiState = uiState,
         onBackClick = onBackClick,
-        onPickClick = { picker.launch(arrayOf("application/vnd.android.package-archive", "application/octet-stream")) },
+        onPickClick = { picker.launch(arrayOf("*/*")) },
         onInstallClick = viewModel::onInstallClick,
     )
 }

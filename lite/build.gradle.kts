@@ -12,7 +12,7 @@ android {
     val versionNameValue = providers.environmentVariable("VERSION_NAME").orNull ?: localVersionName
     val versionCodeValue = providers.environmentVariable("VERSION_CODE").map { it.toInt() }.orNull ?: run {
         val parts = versionNameValue.split(".").mapNotNull { it.toIntOrNull() }
-        if (parts.size >= 3) (parts[0] * 10000 + parts[1] * 100 + parts[2]) * 10 else 10000
+        if (parts.size >= 3) (parts[0] * 10000 + parts[1] * 100 + parts[2]) * 10 + 9 else 10000
     }
 
     defaultConfig {

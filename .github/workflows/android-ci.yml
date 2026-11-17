@@ -109,11 +109,11 @@ jobs:
             echo "未找到构建产物：APK_PATH=${APK_PATH} LITE_APK_PATH=${LITE_APK_PATH}" >&2
             exit 1
           fi
-          # 上传前统一命名，下载者一眼能分清标准版与轻量版。
-          cp "${APK_PATH}" "momoadb-${RELEASE_TAG#v}.apk"
-          cp "${LITE_APK_PATH}" "momoadb-lite-${RELEASE_TAG#v}.apk"
-          APK_PATH="momoadb-${RELEASE_TAG#v}.apk"
-          LITE_APK_PATH="momoadb-lite-${RELEASE_TAG#v}.apk"
+          # 上传前统一命名，下载者一眼能分清标准版与轻量版；文件名保留 v 前缀。
+          cp "${APK_PATH}" "momoadb-${RELEASE_TAG}.apk"
+          cp "${LITE_APK_PATH}" "momoadb-lite-${RELEASE_TAG}.apk"
+          APK_PATH="momoadb-${RELEASE_TAG}.apk"
+          LITE_APK_PATH="momoadb-lite-${RELEASE_TAG}.apk"
           RELEASE_TITLE="默默ADB ${RELEASE_TAG}"
           CURRENT_TAG="${RELEASE_TAG}"
           PREVIOUS_TAG="$(git tag --list 'v[0-9]*.[0-9]*.[0-9]*' --sort=-v:refname | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' | grep -v "^${CURRENT_TAG}$" | head -n 1 || true)"

@@ -49,6 +49,10 @@ android {
     }
 
     buildTypes {
+        debug {
+            // 本地调试版在版本号后带 -dev，设置页可直接看出不是正式版。
+            versionNameSuffix = "-dev"
+        }
         release {
             isMinifyEnabled = true
             isShrinkResources = true

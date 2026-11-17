@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!--
+      仅本地调试版（debug buildType）使用：安装后在桌面即可与正式版区分。
+      正式版（本地脚本打包与 CI 构建）不包含本目录，桌面名保持「默默ADB」。
+    -->
+    <string name="app_name">默默ADB Dev</string>
+</resources>

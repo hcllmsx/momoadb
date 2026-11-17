@@ -32,6 +32,22 @@ class UpdateVersionsTest {
     }
 
     @Test
+    fun baseVersionDropsBuildSuffix() {
+        assertEquals("26.11.17", UpdateVersions.baseVersion("26.11.17-dev"))
+        assertEquals("26.11.17", UpdateVersions.baseVersion(" 26.11.17 "))
+        assertEquals("26.11.17", UpdateVersions.baseVersion("26.11.17+3"))
+        assertEquals("26.11.17", UpdateVersions.baseVersion("26.11.17-dev+3"))
+        assertEquals("", UpdateVersions.baseVersion(null))
+        // 调试版与同一版本的正式版比较，不能被判成需要更新。
+        assertFalse(
+            UpdateVersions.isNewer(
+                "26.11.17",
+                UpdateVersions.baseVersion("26.11.17-dev"),
+            )
+        )
+    }
+
+    @Test
     fun isNewerHandlesDifferentSegmentCounts() {
         assertTrue(UpdateVersions.isNewer("26.11.16.1", "26.11.16"))
         assertFalse(UpdateVersions.isNewer("26.11.16", "26.11.16.0"))

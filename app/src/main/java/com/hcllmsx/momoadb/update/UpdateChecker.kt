@@ -50,7 +50,7 @@ class UpdateChecker(
         val latestVersion = UpdateVersions.normalize(json.optString("tag_name")) ?: return null
         val releaseUrl = json.optString("html_url")
         if (!releaseUrl.startsWith(ProjectUrl)) return null
-        return if (UpdateVersions.isNewer(latestVersion, currentVersion)) {
+        return if (UpdateVersions.isNewer(latestVersion, UpdateVersions.baseVersion(currentVersion))) {
             UpdateCheckState.Available(latestVersion, releaseUrl)
         } else {
             UpdateCheckState.UpToDate(currentVersion)

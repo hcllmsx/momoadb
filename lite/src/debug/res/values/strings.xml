@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- 仅本地调试版使用：桌面显示名为「默默ADB 轻量版 Dev」，正式版保持「默默ADB 轻量版」。 -->
+    <string name="app_name">默默ADB 轻量版 Dev</string>
+</resources>

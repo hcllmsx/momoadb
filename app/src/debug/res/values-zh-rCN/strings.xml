@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- 与 values/strings.xml 保持一致：中文系统下 values-zh-rCN 优先级更高，必须单独覆盖。 -->
+    <string name="app_name">默默ADB Dev</string>
+</resources>

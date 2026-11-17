@@ -51,6 +51,9 @@ android {
     }
 
     buildTypes {
+        debug {
+            versionNameSuffix = "-dev"
+        }
         release {
             // 轻量版只有几行代码，混淆收益极低，保持不混淆更便于排查。
             isMinifyEnabled = false

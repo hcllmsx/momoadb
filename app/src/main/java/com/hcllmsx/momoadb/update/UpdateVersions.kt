@@ -15,6 +15,14 @@ object UpdateVersions {
         return trimmed.takeIf { VersionPattern.matches(it) }
     }
 
+    /**
+     * 取版本号主干，忽略 `-dev`、`+build` 这类构建后缀。
+     *
+     * 调试版的 `versionName` 形如 `26.11.17-dev`，若不剥离，`17-dev` 会解析成 0，
+     * 导致调试版把同一个正式版误判为「有新版本」。
+     */
+    fun baseVersion(raw: String?): String = raw.orEmpty().trim().substringBefore('-').substringBefore('+').trim()
+
     /** 判断 candidate 是否比 current 更新，缺失的段按 0 处理。 */
     fun isNewer(candidate: String, current: String): Boolean {
         val left = candidate.split('.').map { it.toIntOrNull() ?: 0 }

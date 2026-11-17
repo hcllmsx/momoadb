@@ -57,6 +57,12 @@
     <string name="settings_clear_recent_devices_title">Clear recent devices</string>
     <string name="settings_clear_recent_devices_desc">Remove connection history</string>
     <string name="settings_project_url_title">Project URL</string>
+    <string name="settings_check_update_title">Check for updates</string>
+    <string name="settings_check_update_desc">Current version %1$s</string>
+    <string name="settings_check_update_checking">Checking for updates…</string>
+    <string name="settings_check_update_latest">Already up to date (%1$s)</string>
+    <string name="settings_check_update_available">Version %1$s is available, tap to download</string>
+    <string name="settings_check_update_failed">Update check failed, please visit the Releases page</string>
 
     <!-- Home screen -->
     <string name="home_title">Device connection</string>

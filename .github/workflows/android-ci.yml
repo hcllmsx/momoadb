@@ -115,23 +115,42 @@ jobs:
           APK_PATH="momoadb-${RELEASE_TAG}.apk"
           LITE_APK_PATH="momoadb-lite-${RELEASE_TAG}.apk"
           RELEASE_TITLE="默默ADB ${RELEASE_TAG}"
-          CURRENT_TAG="${RELEASE_TAG}"
-          PREVIOUS_TAG="$(git tag --list 'v[0-9]*.[0-9]*.[0-9]*' --sort=-v:refname | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' | grep -v "^${CURRENT_TAG}$" | head -n 1 || true)"
-          if [[ -n "${PREVIOUS_TAG}" ]]; then
-            RANGE="${PREVIOUS_TAG}..HEAD"
-          else
-            # 首次发布没有上一个标签：只取本次提交，避免把继承来的全部历史都写进说明。
-            RANGE="HEAD~1..HEAD"
+          VERSION_NO_V="${RELEASE_TAG#v}"
+
+          # Release 正文优先取 CHANGELOG.md 中本次版本的小节，保证说明与版本一一对应。
+          CHANGELOG_TEXT="$(awk -v heading="## v${VERSION_NO_V}" '
+            $0 == heading { capture = 1; next }
+            capture && /^## / { capture = 0; exit }
+            capture { lines[++total] = $0 }
+            END {
+              start = 1; end = total
+              while (start <= end && lines[start] ~ /^[[:space:]]*$/) start++
+              while (end >= start && lines[end] ~ /^[[:space:]]*$/) end--
+              for (i = start; i <= end; i++) print lines[i]
+            }
+          ' CHANGELOG.md || true)"
+
+          if [[ -z "${CHANGELOG_TEXT}" ]]; then
+            CURRENT_TAG="${RELEASE_TAG}"
+            PREVIOUS_TAG="$(git tag --list 'v[0-9]*.[0-9]*.[0-9]*' --sort=-v:refname | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' | grep -v "^${CURRENT_TAG}$" | head -n 1 || true)"
+            if [[ -n "${PREVIOUS_TAG}" ]]; then
+              RANGE="${PREVIOUS_TAG}..HEAD"
+            else
+              # 首次发布没有上一个标签：只取本次提交，避免把继承来的全部历史都写进说明。
+              RANGE="HEAD~1..HEAD"
+            fi
+            CHANGELOG_TEXT="$(git log "${RANGE}" --no-merges --pretty=format:'%s%x09%h' | awk -F '\t' '!seen[$1]++ { printf "- %s (%s)\n", $1, $2 }' || true)"
           fi
-          CHANGELOG="$(git log "${RANGE}" --no-merges --pretty=format:'%s%x09%h' | awk -F '\t' '!seen[$1]++ { printf "- %s (%s)\n", $1, $2 }' || true)"
-          if [[ -z "${CHANGELOG}" ]]; then
-            CHANGELOG="- 本次正式版未检测到新的提交记录。"
+
+          if [[ -z "${CHANGELOG_TEXT}" ]]; then
+            CHANGELOG_TEXT="- 本次正式版未检测到新的更新记录。"
           fi
+
           RELEASE_NOTES="$(mktemp)"
           {
-            echo "## 正式版更新记录"
+            echo "### 更新内容"
             echo
-            echo "${CHANGELOG}"
+            echo "${CHANGELOG_TEXT}"
           } > "${RELEASE_NOTES}"
           if gh release view "${RELEASE_TAG}" >/dev/null 2>&1; then
             gh release edit "${RELEASE_TAG}" \

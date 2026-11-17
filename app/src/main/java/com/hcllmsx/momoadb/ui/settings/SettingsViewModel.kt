@@ -12,6 +12,8 @@ import com.hcllmsx.momoadb.discovery.ScanRangeParser
 import com.hcllmsx.momoadb.i18n.AppLanguage
 import com.hcllmsx.momoadb.i18n.appString
 import com.hcllmsx.momoadb.scrcpy.MirrorQualityPreset
+import com.hcllmsx.momoadb.update.UpdateCenter
+import com.hcllmsx.momoadb.update.UpdateCheckState
 import com.hcllmsx.momoadb.validation.NetworkInputValidator
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -39,6 +41,7 @@ class SettingsViewModel(
 ) : ViewModel() {
     private val state = MutableStateFlow(SettingsUiState(language = AppLanguage.current()))
     val uiState: StateFlow<SettingsUiState> = state.asStateFlow()
+    val updateState: StateFlow<UpdateCheckState> = UpdateCenter.state
     private var defaultScanRangeSaved = false
 
     init {
@@ -139,6 +142,10 @@ class SettingsViewModel(
         viewModelScope.launch {
             recentDeviceStore.clear()
         }
+    }
+
+    fun onCheckUpdateClicked() {
+        UpdateCenter.refresh()
     }
 
     private fun updateTimeout(

@@ -13,6 +13,7 @@ import androidx.compose.material.icons.automirrored.outlined.OpenInNew
 import androidx.compose.material.icons.outlined.BugReport
 import androidx.compose.material.icons.outlined.CleaningServices
 import androidx.compose.material.icons.outlined.DarkMode
+import androidx.compose.material.icons.outlined.Refresh
 import androidx.compose.material.icons.outlined.Schedule
 import androidx.compose.material.icons.outlined.SettingsEthernet
 import androidx.compose.material.icons.outlined.Tune
@@ -32,6 +33,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.hcllmsx.momoadb.BuildConfig
 import com.hcllmsx.momoadb.data.ThemeMode
 import com.hcllmsx.momoadb.i18n.AppLanguage
 import com.hcllmsx.momoadb.scrcpy.MirrorQualityPreset
@@ -39,6 +41,7 @@ import com.hcllmsx.momoadb.ui.components.SettingBlock
 import com.hcllmsx.momoadb.ui.components.SettingGroupCard
 import com.hcllmsx.momoadb.ui.theme.AdbManagerTheme
 import com.hcllmsx.momoadb.ui.theme.AppDimens
+import com.hcllmsx.momoadb.update.UpdateCheckState
 import com.hcllmsx.momoadb.R
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
@@ -49,6 +52,7 @@ fun SettingsScreen(
     viewModel: SettingsViewModel = viewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val updateState by viewModel.updateState.collectAsStateWithLifecycle()
 
     SettingsContent(
         bottomPadding = bottomPadding,
@@ -62,6 +66,8 @@ fun SettingsScreen(
         onLanguageSelected = viewModel::onLanguageSelected,
         onClearRecentDevicesClicked = viewModel::onClearRecentDevicesClicked,
         onDiagnosticsClick = onDiagnosticsClick,
+        updateState = updateState,
+        onCheckUpdateClicked = viewModel::onCheckUpdateClicked,
     )
 }
 
@@ -79,6 +85,8 @@ private fun SettingsContent(
     onLanguageSelected: (AppLanguage) -> Unit,
     onClearRecentDevicesClicked: () -> Unit,
     onDiagnosticsClick: () -> Unit,
+    updateState: UpdateCheckState = UpdateCheckState.Idle,
+    onCheckUpdateClicked: () -> Unit = {},
 ) {
     val uriHandler = LocalUriHandler.current
 
@@ -250,6 +258,17 @@ private fun SettingsContent(
             item {
                 SettingGroupCard {
                     SettingBlock(
+                        icon = Icons.Outlined.Refresh,
+                        title = stringResource(R.string.settings_check_update_title),
+                        description = updateCheckDescription(updateState),
+                        onClick = {
+                            when (val current = updateState) {
+                                is UpdateCheckState.Available -> uriHandler.openUri(current.releaseUrl)
+                                else -> onCheckUpdateClicked()
+                            }
+                        },
+                    )
+                    SettingBlock(
                         icon = Icons.AutoMirrored.Outlined.OpenInNew,
                         title = stringResource(R.string.settings_project_url_title),
                         description = "hcllmsx/momoadb",
@@ -260,6 +279,19 @@ private fun SettingsContent(
         }
     }
 }
+
+@Composable
+private fun updateCheckDescription(state: UpdateCheckState): String =
+    when (state) {
+        UpdateCheckState.Idle ->
+            stringResource(R.string.settings_check_update_desc, BuildConfig.VERSION_NAME)
+        UpdateCheckState.Checking -> stringResource(R.string.settings_check_update_checking)
+        is UpdateCheckState.UpToDate ->
+            stringResource(R.string.settings_check_update_latest, state.currentVersion)
+        is UpdateCheckState.Available ->
+            stringResource(R.string.settings_check_update_available, state.latestVersion)
+        UpdateCheckState.Failed -> stringResource(R.string.settings_check_update_failed)
+    }
 
 private const val ProjectUrl = "https://github.com/hcllmsx/momoadb"
 
@@ -278,6 +310,8 @@ private fun SettingsContentPreview() {
             onLanguageSelected = {},
             onClearRecentDevicesClicked = {},
             onDiagnosticsClick = {},
+            updateState = UpdateCheckState.Idle,
+            onCheckUpdateClicked = {},
         )
     }
 }

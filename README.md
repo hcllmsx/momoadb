@@ -62,6 +62,10 @@
 - [scrcpy](https://github.com/Genymobile/scrcpy)
 - 上游项目 sky adb（[sky22333](https://github.com/sky22333)）
 
+## 作者
+
+莫莫先生 · [GitHub](https://github.com/hcllmsx) · [B 站](https://space.bilibili.com/255947051)
+
 ## 开源许可
 
 基于 GPL-3.0 协议开源，详见 [LICENSE](LICENSE)。

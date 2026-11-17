@@ -16,3 +16,7 @@ app/build/
 *.apk
 _temp/
 out_put/
+
+# 本地开发菜单脚本（仅在作者本机使用）
+/1-run_menu.bat
+/build_menu.ps1

@@ -4,7 +4,7 @@ plugins {
 }
 
 android {
-    namespace = "com.sky22333.skyadb"
+    namespace = "com.hcllmsx.momoadb"
     compileSdk = 37
     val ciVersionCode = providers.environmentVariable("VERSION_CODE").map { it.toInt() }.orNull
     val ciVersionName = providers.environmentVariable("VERSION_NAME").orNull
@@ -17,12 +17,22 @@ android {
         !keyStorePasswordValue.isNullOrBlank() &&
         !keyPasswordValue.isNullOrBlank()
 
+    // 根目录 VERSION 是版本号的单一事实来源，CI 可用环境变量覆盖。
+    val versionFile = rootProject.file("VERSION")
+    val localVersionName = if (versionFile.exists()) versionFile.readText().trim() else "1.0.0"
+    val resolvedVersionName = ciVersionName ?: localVersionName
+    val resolvedVersionCode = ciVersionCode ?: run {
+        val parts = resolvedVersionName.split(".").mapNotNull { it.toIntOrNull() }
+        if (parts.size >= 3) (parts[0] * 10000 + parts[1] * 100 + parts[2]) * 10 + 9 else 10000
+    }
+
     defaultConfig {
-        applicationId = "com.sky22333.skyadb"
+        applicationId = "com.hcllmsx.momoadb"
+        // navigation 2.10 起要求 24，kadb / OkHttp / AppCompat 的下限也都低于它。
         minSdk = 24
         targetSdk = 37
-        versionCode = ciVersionCode ?: 10000
-        versionName = ciVersionName ?: "1.0.0"
+        versionCode = resolvedVersionCode
+        versionName = resolvedVersionName
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 

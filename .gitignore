@@ -14,4 +14,5 @@ app/build/
 .tmp-deps/
 .tmp*/
 *.apk
-gradle.properties
+_temp/
+out_put/

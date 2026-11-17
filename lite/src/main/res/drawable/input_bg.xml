@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 输入框：获得焦点时同样加亮边框，方便遥控器停在输入框上时看清当前位置。 -->
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:state_focused="true">
+        <shape android:shape="rectangle">
+            <solid android:color="#10161F" />
+            <stroke
+                android:width="3dp"
+                android:color="@color/stroke_focused" />
+            <corners android:radius="8dp" />
+        </shape>
+    </item>
+    <item>
+        <shape android:shape="rectangle">
+            <solid android:color="#10161F" />
+            <stroke
+                android:width="1dp"
+                android:color="#2A3242" />
+            <corners android:radius="8dp" />
+        </shape>
+    </item>
+</selector>

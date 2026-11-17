@@ -25,4 +25,4 @@ jobs:
       - run: sdkmanager "platforms;android-37.0" "build-tools;37.0.0"
       - uses: gradle/actions/setup-gradle@v6
       - run: chmod +x gradlew
-      - run: ./gradlew --no-daemon testDebugUnitTest lintRelease assembleDebug
+      - run: ./gradlew --no-daemon testDebugUnitTest lintRelease assembleDebug :lite:assembleRelease

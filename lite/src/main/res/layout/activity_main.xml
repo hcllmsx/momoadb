@@ -1,0 +1,437 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  电视 / 盒子大屏布局：控件大、横向排布，遥控器只需上下左右移动。
+  Android 4.4（API 19）只用系统自带控件，不引入 AndroidX。
+-->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/bg"
+    android:orientation="vertical"
+    android:padding="24dp">
+
+    <ScrollView
+        android:id="@+id/controls"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:fadeScrollbars="false">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/title"
+                android:textColor="@color/text_primary"
+                android:textSize="26sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/subtitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:text="@string/subtitle"
+                android:textColor="@color/text_secondary"
+                android:textSize="14sp" />
+
+            <!-- 连接 -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:orientation="horizontal">
+
+                <EditText
+                    android:id="@+id/host"
+                    android:layout_width="0dp"
+                    android:layout_height="56dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/input_bg"
+                    android:hint="@string/host_hint"
+                    android:imeOptions="actionNext"
+                    android:inputType="textUri"
+                    android:paddingLeft="14dp"
+                    android:paddingRight="14dp"
+                    android:singleLine="true"
+                    android:textColor="@color/text_primary"
+                    android:textColorHint="@color/text_secondary"
+                    android:textSize="18sp" />
+
+                <EditText
+                    android:id="@+id/port"
+                    android:layout_width="110dp"
+                    android:layout_height="56dp"
+                    android:layout_marginLeft="10dp"
+                    android:background="@drawable/input_bg"
+                    android:hint="@string/port_hint"
+                    android:imeOptions="actionDone"
+                    android:inputType="number"
+                    android:paddingLeft="14dp"
+                    android:paddingRight="14dp"
+                    android:singleLine="true"
+                    android:text="5555"
+                    android:textColor="@color/text_primary"
+                    android:textColorHint="@color/text_secondary"
+                    android:textSize="18sp" />
+
+                <Button
+                    android:id="@+id/connect"
+                    android:layout_width="130dp"
+                    android:layout_height="56dp"
+                    android:layout_marginLeft="10dp"
+                    android:background="@drawable/field_bg"
+                    android:focusable="true"
+                    android:text="@string/action_connect"
+                    android:textColor="@color/text_primary"
+                    android:textSize="18sp" />
+            </LinearLayout>
+
+            <!-- 常用操作 -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:orientation="horizontal">
+
+                <Button
+                    android:id="@+id/device_info"
+                    android:layout_width="0dp"
+                    android:layout_height="54dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/field_bg"
+                    android:focusable="true"
+                    android:text="@string/action_device_info"
+                    android:textColor="@color/text_primary"
+                    android:textSize="17sp" />
+
+                <Button
+                    android:id="@+id/screenshot"
+                    android:layout_width="0dp"
+                    android:layout_height="54dp"
+                    android:layout_marginLeft="10dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/field_bg"
+                    android:focusable="true"
+                    android:text="@string/action_screenshot"
+                    android:textColor="@color/text_primary"
+                    android:textSize="17sp" />
+
+                <Button
+                    android:id="@+id/disconnect"
+                    android:layout_width="0dp"
+                    android:layout_height="54dp"
+                    android:layout_marginLeft="10dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/field_bg"
+                    android:focusable="true"
+                    android:text="@string/action_disconnect"
+                    android:textColor="@color/text_primary"
+                    android:textSize="17sp" />
+            </LinearLayout>
+
+            <!-- 安装 APK -->
+            <TextView
+                style="@style/SectionTitle"
+                android:text="@string/section_install" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <EditText
+                    android:id="@+id/apk_path"
+                    android:layout_width="0dp"
+                    android:layout_height="56dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/input_bg"
+                    android:hint="@string/apk_hint"
+                    android:inputType="textUri"
+                    android:paddingLeft="14dp"
+                    android:paddingRight="14dp"
+                    android:singleLine="true"
+                    android:textColor="@color/text_primary"
+                    android:textColorHint="@color/text_secondary"
+                    android:textSize="16sp" />
+
+                <Button
+                    android:id="@+id/pick_apk"
+                    android:layout_width="100dp"
+                    android:layout_height="56dp"
+                    android:layout_marginLeft="10dp"
+                    android:background="@drawable/field_bg"
+                    android:focusable="true"
+                    android:text="@string/action_pick"
+                    android:textColor="@color/text_primary"
+                    android:textSize="17sp" />
+
+                <Button
+                    android:id="@+id/install_apk"
+                    android:layout_width="110dp"
+                    android:layout_height="56dp"
+                    android:layout_marginLeft="10dp"
+                    android:background="@drawable/field_bg"
+                    android:focusable="true"
+                    android:text="@string/action_install"
+                    android:textColor="@color/text_primary"
+                    android:textSize="17sp" />
+            </LinearLayout>
+
+            <!-- 文件传输 -->
+            <TextView
+                style="@style/SectionTitle"
+                android:text="@string/section_files" />
+
+            <EditText
+                android:id="@+id/remote_path"
+                android:layout_width="match_parent"
+                android:layout_height="54dp"
+                android:background="@drawable/input_bg"
+                android:hint="@string/remote_hint"
+                android:inputType="textUri"
+                android:paddingLeft="14dp"
+                android:paddingRight="14dp"
+                android:singleLine="true"
+                android:text="/sdcard/"
+                android:textColor="@color/text_primary"
+                android:textColorHint="@color/text_secondary"
+                android:textSize="16sp" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:orientation="horizontal">
+
+                <EditText
+                    android:id="@+id/local_path"
+                    android:layout_width="0dp"
+                    android:layout_height="54dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/input_bg"
+                    android:hint="@string/local_hint"
+                    android:inputType="textUri"
+                    android:paddingLeft="14dp"
+                    android:paddingRight="14dp"
+                    android:singleLine="true"
+                    android:textColor="@color/text_primary"
+                    android:textColorHint="@color/text_secondary"
+                    android:textSize="16sp" />
+
+                <Button
+                    android:id="@+id/download_file"
+                    android:layout_width="130dp"
+                    android:layout_height="54dp"
+                    android:layout_marginLeft="10dp"
+                    android:background="@drawable/field_bg"
+                    android:focusable="true"
+                    android:text="@string/action_download"
+                    android:textColor="@color/text_primary"
+                    android:textSize="17sp" />
+
+                <Button
+                    android:id="@+id/upload_file"
+                    android:layout_width="130dp"
+                    android:layout_height="54dp"
+                    android:layout_marginLeft="10dp"
+                    android:background="@drawable/field_bg"
+                    android:focusable="true"
+                    android:text="@string/action_upload"
+                    android:textColor="@color/text_primary"
+                    android:textSize="17sp" />
+            </LinearLayout>
+
+            <!-- 快捷操作 -->
+            <TextView
+                style="@style/SectionTitle"
+                android:text="@string/section_keys" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <Button
+                    android:id="@+id/key_home"
+                    android:layout_width="0dp"
+                    android:layout_height="54dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/field_bg"
+                    android:focusable="true"
+                    android:text="@string/action_key_home"
+                    android:textColor="@color/text_primary"
+                    android:textSize="17sp" />
+
+                <Button
+                    android:id="@+id/key_back"
+                    android:layout_width="0dp"
+                    android:layout_height="54dp"
+                    android:layout_marginLeft="10dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/field_bg"
+                    android:focusable="true"
+                    android:text="@string/action_key_back"
+                    android:textColor="@color/text_primary"
+                    android:textSize="17sp" />
+
+                <Button
+                    android:id="@+id/key_power"
+                    android:layout_width="0dp"
+                    android:layout_height="54dp"
+                    android:layout_marginLeft="10dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/field_bg"
+                    android:focusable="true"
+                    android:text="@string/action_key_power"
+                    android:textColor="@color/text_primary"
+                    android:textSize="17sp" />
+
+                <Button
+                    android:id="@+id/key_volume_up"
+                    android:layout_width="0dp"
+                    android:layout_height="54dp"
+                    android:layout_marginLeft="10dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/field_bg"
+                    android:focusable="true"
+                    android:text="@string/action_key_volume_up"
+                    android:textColor="@color/text_primary"
+                    android:textSize="17sp" />
+
+                <Button
+                    android:id="@+id/key_volume_down"
+                    android:layout_width="0dp"
+                    android:layout_height="54dp"
+                    android:layout_marginLeft="10dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/field_bg"
+                    android:focusable="true"
+                    android:text="@string/action_key_volume_down"
+                    android:textColor="@color/text_primary"
+                    android:textSize="17sp" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:orientation="horizontal">
+
+                <Button
+                    android:id="@+id/reboot"
+                    android:layout_width="0dp"
+                    android:layout_height="54dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/field_bg"
+                    android:focusable="true"
+                    android:text="@string/action_reboot"
+                    android:textColor="@color/text_primary"
+                    android:textSize="17sp" />
+
+                <Button
+                    android:id="@+id/reboot_recovery"
+                    android:layout_width="0dp"
+                    android:layout_height="54dp"
+                    android:layout_marginLeft="10dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/field_bg"
+                    android:focusable="true"
+                    android:text="@string/action_reboot_recovery"
+                    android:textColor="@color/text_primary"
+                    android:textSize="17sp" />
+
+                <Button
+                    android:id="@+id/clear"
+                    android:layout_width="0dp"
+                    android:layout_height="54dp"
+                    android:layout_marginLeft="10dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/field_bg"
+                    android:focusable="true"
+                    android:text="@string/action_clear"
+                    android:textColor="@color/text_primary"
+                    android:textSize="17sp" />
+            </LinearLayout>
+
+            <!-- 命令 -->
+            <TextView
+                style="@style/SectionTitle"
+                android:text="@string/section_shell" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <EditText
+                    android:id="@+id/command"
+                    android:layout_width="0dp"
+                    android:layout_height="56dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/input_bg"
+                    android:hint="@string/command_hint"
+                    android:imeOptions="actionDone"
+                    android:inputType="text"
+                    android:paddingLeft="14dp"
+                    android:paddingRight="14dp"
+                    android:singleLine="true"
+                    android:textColor="@color/text_primary"
+                    android:textColorHint="@color/text_secondary"
+                    android:textSize="17sp" />
+
+                <Button
+                    android:id="@+id/run"
+                    android:layout_width="110dp"
+                    android:layout_height="56dp"
+                    android:layout_marginLeft="10dp"
+                    android:background="@drawable/field_bg"
+                    android:focusable="true"
+                    android:text="@string/action_run"
+                    android:textColor="@color/text_primary"
+                    android:textSize="17sp" />
+            </LinearLayout>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:text="@string/log_title"
+                android:textColor="@color/text_secondary"
+                android:textSize="13sp" />
+        </LinearLayout>
+    </ScrollView>
+
+    <ScrollView
+        android:id="@+id/log_scroll"
+        android:layout_width="match_parent"
+        android:layout_height="180dp"
+        android:layout_marginTop="6dp"
+        android:background="@drawable/log_bg"
+        android:fadeScrollbars="false"
+        android:focusable="true"
+        android:padding="12dp">
+
+        <TextView
+            android:id="@+id/output"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:fontFamily="monospace"
+            android:textColor="@color/text_primary"
+            android:textIsSelectable="false"
+            android:textSize="14sp" />
+    </ScrollView>
+
+    <TextView
+        android:id="@+id/status"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="@string/status_ready"
+        android:textColor="@color/accent"
+        android:textSize="14sp" />
+</LinearLayout>

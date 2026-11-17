@@ -1,12 +1,10 @@
-# sky adb
+# 默默ADB（momoadb）
 
 <p align="center">
-  <img src="app/src/main/res/mipmap-xxxhdpi/ic_launcher.png"
-       alt="demo1"
-       width="200">
+  <img src="app/src/main/res/mipmap-xxxhdpi/ic_launcher.png" alt="默默ADB" width="160">
 </p>
 
-sky adb 是一款运行在 Android 手机上的 ADB 管理工具，用于通过 WiFi ADB / Wireless Debugging 或 USB OTG 管理手机、平板、电视和盒子。
+默默ADB 是一款运行在 Android 手机、平板与电视上的 ADB 管理工具，通过 WiFi ADB / 无线调试或 USB OTG 管理手机、平板、电视和电视盒子。
 
 ## 功能特性
 
@@ -25,25 +23,25 @@ sky adb 是一款运行在 Android 手机上的 ADB 管理工具，用于通过 
 - Shell 命令执行和输出查看
 - 诊断日志记录错误信息，便于排查连接和功能异常
 - 默认端口、连接超时、命令超时、镜像画质和主题设置
+- 手机与大屏设备自适应的界面：手机上使用底部导航，电视与电视盒子使用左侧导航与遥控器方向键操作
 
-## 如何使用
+## 使用
 
-1. 无线连接：在目标设备开启开发者选项和无线调试，在 sky adb 中输入 IP 和 ADB 端口，或先进行无线调试配对。
+1. 无线连接：在目标设备开启开发者选项和无线调试，在 默默ADB 中输入 IP 和 ADB 端口，或先进行无线调试配对。
 2. USB 连接：使用支持数据传输的 OTG 线连接，允许本机访问 USB 设备，并在目标设备确认 USB 调试授权；Fastboot 模式可直接从 USB OTG 列表连接。
 3. 连接成功后进入设备详情页，使用应用管理、APK 安装、文件管理、截图、遥控器、屏幕镜像或 Shell 等功能。
 4. 常用 WiFi 设备会自动保存到最近设备列表，后续可快速回填连接信息。
 
+运行环境：Android 7.0（API 24）及以上。电视端使用遥控器方向键操作，确认键等同点击。
+
 屏幕镜像的控制区可以隐藏，输入键盘默认关闭，可通过顶部键盘按钮独立打开和关闭。
 
-## 预览
+## 版本说明
 
-<div style="display:inline-block">
-<img src="docs/img/demo1.jpg" alt="demo1" width="230">
-<img src="docs/img/demo2.jpg" alt="demo2" width="230">
-<img src="docs/img/demo3.jpg" alt="demo3" width="230">
-</div>
+- **标准版**：Android 7.0 及以上，包含上面列出的全部功能，电视与盒子上使用遥控器操作。
+- **轻量版**：面向 Android 4.4（API 19）的电视与盒子，传统界面、无第三方依赖，提供连接、设备信息、截图、APK 安装、文件上传下载、按键模拟、重启与 Shell 命令。
 
----
+两个版本使用不同的包名，可以同时安装在同一台设备上。
 
 ## 技术栈
 
@@ -58,7 +56,12 @@ sky adb 是一款运行在 Android 手机上的 ADB 管理工具，用于通过 
 
 详细实现、构建验证和维护规范见 [项目文档](docs/README.md)。
 
-### 鸣谢
+## 致谢
 
 - [Kadb](https://github.com/flyfishxu/Kadb)
 - [scrcpy](https://github.com/Genymobile/scrcpy)
+- 上游项目 sky adb（[sky22333](https://github.com/sky22333)）
+
+## 开源许可
+
+基于 GPL-3.0 协议开源，详见 [LICENSE](LICENSE)。

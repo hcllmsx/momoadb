@@ -1,10 +1,10 @@
-# sky adb 项目文档
+# 默默ADB 项目文档
 
-本文档基于当前源码实际状态整理，用于说明 sky adb 的功能范围、项目结构、开发规范、维护规范和性能要求。后续开发应在功能或工程结构变化后同步更新本文档。
+本文档基于当前源码实际状态整理，用于说明 默默ADB 的功能范围、项目结构、开发规范、维护规范和性能要求。后续开发应在功能或工程结构变化后同步更新本文档。
 
 ## 项目定位
 
-sky adb 是一款运行在 Android 手机上的支持简体中文和英文的 ADB 管理工具。它通过 WiFi ADB / Wireless Debugging 或 USB OTG 连接并管理目标 Android 设备，适用于手机、平板、电视、盒子等设备的日常维护。
+默默ADB 是一款运行在 Android 手机上的支持简体中文和英文的 ADB 管理工具。它通过 WiFi ADB / Wireless Debugging 或 USB OTG 连接并管理目标 Android 设备，适用于手机、平板、电视、盒子等设备的日常维护。
 
 项目采用单 Android App 模块。
 
@@ -51,8 +51,9 @@ sky adb 是一款运行在 Android 手机上的支持简体中文和英文的 AD
 
 ## 运行范围
 
-- 运行 sky adb 的设备：最低 Android 7.0，API 24。
+- 运行 默默ADB 的设备：最低 Android 7.0，API 24。
 - 编译目标：compileSdk 37，targetSdk 37。
+- 电视与电视盒子：界面按窗口宽度自适应，宽屏使用左侧导航栏与多列栅格，支持遥控器方向键聚焦与确认键操作；`uses-feature` 声明 leanback 与触摸屏为非必需。
 - Android 17 局域网：targetSdk 37 需声明并运行时申请 `ACCESS_LOCAL_NETWORK`，用于 mDNS 发现、网段扫描和 WiFi ADB 连接。
 - 被连接设备：支持 ADB over TCP / Wireless Debugging，或已开启 USB 调试并完成授权。Android 11+ 推荐使用无线调试配对；传统 WiFi ADB 设备通常使用 `5555` 端口。
 - 屏幕镜像目标设备：以目标设备是否支持 scrcpy server、视频编码和 ADB socket 转发为准；默认画质使用均衡模式，高负载设备可在设置中切换为流畅模式。
@@ -60,7 +61,7 @@ sky adb 是一款运行在 Android 手机上的支持简体中文和英文的 AD
 ## 项目结构
 
 ```text
-skyadb/
+momoadb/
 ├── .github/workflows/
 │   ├── android-checks.yml       # push / PR：单元测试、Lint、Debug 构建
 │   └── android-ci.yml           # 手动正式发布：测试、Lint、签名构建、Release
@@ -71,7 +72,7 @@ skyadb/
 │       ├── main/
 │       │   ├── AndroidManifest.xml
 │       │   ├── assets/scrcpy/   # 官方 scrcpy server
-│       │   ├── java/com/sky22333/skyadb/
+│       │   ├── java/com/hcllmsx/momoadb/
 │       │   │   ├── adb/         # Kadb 身份、连接、命令、传输和 Fastboot
 │       │   │   ├── apps/        # 目标设备应用名称、图标与分类信息
 │       │   │   ├── data/        # DataStore 设置和最近 WiFi 设备
@@ -90,6 +91,14 @@ skyadb/
 │       │   └── res/             # 中英文资源、图标、主题与平台配置
 │       ├── test/                # JVM 单元测试
 │       └── androidTest/         # USB、镜像、解码和键盘真机测试
+├── lite/                        # Android 4.4（API 19）轻量版，传统 View + 自研精简 ADB 客户端
+│   ├── build.gradle.kts         # minSdk 19，无 AndroidX 依赖
+│   └── src/main/
+│       ├── AndroidManifest.xml
+│       ├── java/com/hcllmsx/momoadb/lite/
+│       │   ├── MainActivity.kt  # 遥控器友好的单页界面
+│       │   └── adb/             # ADB 协议、RSA 认证与 shell 执行
+│       └── res/                 # 布局、焦点态与电视横幅
 ├── docs/README.md               # 当前实现与开发维护规范
 ├── docs/img/                    # README 使用的预览图片
 ├── gradle/libs.versions.toml    # 依赖版本
@@ -135,13 +144,26 @@ skyadb/
 - 镜像启停串行化，延迟清理不关闭后续启动的新会话。触摸 MOVE 按指针合并，保留按下、抬起和其他控制指令的顺序。
 - scrcpy 资产为 `app/src/main/assets/scrcpy/scrcpy-server-v5.0.1`，SHA-256 为 `764eb6f79811d5211fe9df341120882ba9994c7a61b897d7bf3fb662e53bc536`；更换资产时同步更新 `ScrcpyConstants` 并核验协议。
 
+## 轻量版（Android 4.4）
+
+- 独立模块 `lite`，包名 `com.hcllmsx.momoadb.lite`，`minSdk` 与 `targetSdk` 均为 19，可与标准版同时安装。
+- 不引入任何 AndroidX 依赖，界面使用系统原生 View 与 Holo 主题；控件高度不低于 54dp，焦点态由 `field_bg` / `input_bg` 提供描边，进入页面把焦点放到「连接」按钮。
+- ADB 协议自行实现（`lite/src/main/java/com/hcllmsx/momoadb/lite/adb/`），只使用 CNXN / AUTH / OPEN / OKAY / WRTE / CLSE，一次只跑一条流，不做多路复用调度。
+- 认证使用 RSA-2048，公钥按 AOSP `android_pubkey_encode` 的 524 字节小端结构编码；私钥以 PKCS#8 保存在应用私有目录，首次连接需要用户在设备上确认授权。
+- 文件传输使用 `sync:` 服务（RECV / SEND，单包 64 KB）。旧版 adbd 的 `shell:` 命令一律经过 PTY，换行转换会破坏二进制内容，因此推送、拉取、截图都不走 `cat` 重定向。
+- 推送在路径后附加 `,0100644` 权限，由设备端 `sync` 服务解析；拉取可写回本地文件，下载大文件时不会整体占用内存。
+- APK 安装先推送到 `/data/local/tmp/momoadb_install.apk`，再执行 `pm install -r -t`，结束后删除临时文件。
+- 截图执行 `screencap -p` 到临时文件再拉取，预览按最长边 1280 降采样，解码失败给出明确提示。
+- 重启使用 `reboot:` 服务，不依赖 root；设备重启期间连接断开属于预期行为。
+
 ## UI 与交互规范
 
-- App 内可见文案通过资源提供简体中文和英文，品牌名统一写作 `sky adb`。
+- App 内可见文案通过资源提供简体中文和英文，品牌名统一写作 `默默ADB`；仓库名、包名与模块名仍使用 `momoadb`。
 - 使用 Material 3 作为基础，但要保持现代、扁平、克制、工具型产品风格。
 - 页面不能有粗糙默认感，按钮、卡片、输入框、状态徽章、列表间距必须统一。
 - 首页、设置页、设备页、Shell 页等长内容页面使用 `LazyColumn`，避免滚动不跟手。
 - 页面切换使用淡入淡出，底部导航与工具卡片使用共享过渡；动画参数统一由 `SharedMotion` 管理。
+- 宽窗口（平板、电视、电视盒子）使用左侧 `NavigationRail` 替代底部导航，内容限宽 1280dp 居中，工具栅格按 `LocalWindowLayout.gridColumns` 分列，可聚焦控件通过 `tvFocusRing` 绘制焦点描边。
 - 列表项要尽量轻量，避免在列表滚动时做阻塞 IO、ADB 调用或大图加载。
 - 耗时操作必须展示状态，失败必须给出中文原因和下一步建议。
 - 危险操作，例如卸载应用，应保留确认流程。
@@ -234,7 +256,7 @@ skyadb/
 git diff --check
 ```
 
-单元测试覆盖输入校验、错误处理、协议编码、状态模型，以及 Fastboot 多包响应、总超时、取消、输出上限和异常关闭。真机测试覆盖单帧解码输出、镜像键盘开关、USB ADB 并发与文件往返、镜像 Surface 重建，以及 Fastboot 摘要、多行响应、失败后的查询和界面复制。USB 测试要求本机作为 OTG 主机连接对应模式下已授权的目标；缺少目标时跳过对应测试。
+单元测试覆盖输入校验、错误处理、协议编码、状态模型，以及 Fastboot 多包响应、总超时、取消、输出上限和异常关闭。轻量版另有 `AdbConnectionSyncTest`，用本地假 adbd 跑通 sync 握手、RECV / SEND 分帧、二进制完整性与设备端失败信息，不依赖真机。真机测试覆盖单帧解码输出、镜像键盘开关、USB ADB 并发与文件往返、镜像 Surface 重建，以及 Fastboot 摘要、多行响应、失败后的查询和界面复制。USB 测试要求本机作为 OTG 主机连接对应模式下已授权的目标；缺少目标时跳过对应测试。
 
 `FastbootUiTest` 默认只查询和复制结果。显式传入 instrumentation 参数 `fastbootReboot=bootloader` 或 `fastbootReboot=system` 时额外验证对应重启按钮及会话清理，测试结束后目标设备停留在所选模式。额外传入 `fastbootPrepare=true` 可从已授权的 USB ADB 目标重启到 Bootloader，再执行本轮测试；未显式指定时不会切换目标模式。
 

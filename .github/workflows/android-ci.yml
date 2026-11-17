@@ -104,7 +104,17 @@ jobs:
             exit 1
           fi
           APK_PATH="$(find app/build/outputs/apk/release -name '*.apk' | head -n 1)"
-          RELEASE_TITLE="skyadb ${RELEASE_TAG}"
+          LITE_APK_PATH="$(find lite/build/outputs/apk/release -name '*.apk' | head -n 1)"
+          if [[ -z "${APK_PATH}" || -z "${LITE_APK_PATH}" ]]; then
+            echo "未找到构建产物：APK_PATH=${APK_PATH} LITE_APK_PATH=${LITE_APK_PATH}" >&2
+            exit 1
+          fi
+          # 上传前统一命名，下载者一眼能分清标准版与轻量版。
+          cp "${APK_PATH}" "momoadb-${RELEASE_TAG#v}.apk"
+          cp "${LITE_APK_PATH}" "momoadb-lite-${RELEASE_TAG#v}.apk"
+          APK_PATH="momoadb-${RELEASE_TAG#v}.apk"
+          LITE_APK_PATH="momoadb-lite-${RELEASE_TAG#v}.apk"
+          RELEASE_TITLE="momoadb ${RELEASE_TAG}"
           CURRENT_TAG="${RELEASE_TAG}"
           PREVIOUS_TAG="$(git tag --list 'v[0-9]*.[0-9]*.[0-9]*' --sort=-v:refname | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' | grep -v "^${CURRENT_TAG}$" | head -n 1 || true)"
           if [[ -n "${PREVIOUS_TAG}" ]]; then
@@ -126,9 +136,9 @@ jobs:
             gh release edit "${RELEASE_TAG}" \
               --title "${RELEASE_TITLE}" \
               --notes-file "${RELEASE_NOTES}"
-            gh release upload "${RELEASE_TAG}" "${APK_PATH}" --clobber
+            gh release upload "${RELEASE_TAG}" "${APK_PATH}" "${LITE_APK_PATH}" --clobber
           else
-            gh release create "${RELEASE_TAG}" "${APK_PATH}" \
+            gh release create "${RELEASE_TAG}" "${APK_PATH}" "${LITE_APK_PATH}" \
               --title "${RELEASE_TITLE}" \
               --notes-file "${RELEASE_NOTES}"
           fi

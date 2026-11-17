@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">默默ADB 轻量版</string>
+    <string name="title">默默ADB 轻量版</string>
+    <string name="subtitle">面向 Android 4.4 的电视 / 盒子 ADB 工具，遥控器可直接操作</string>
+
+    <string name="host_hint">设备 IP，例如 192.168.1.86</string>
+    <string name="port_hint">端口</string>
+    <string name="action_connect">连接</string>
+    <string name="action_disconnect">断开</string>
+    <string name="action_device_info">设备信息</string>
+    <string name="action_screenshot">截图</string>
+    <string name="action_clear">清空日志</string>
+    <string name="action_run">执行</string>
+    <string name="action_pick">选择</string>
+    <string name="action_install">安装</string>
+    <string name="action_download">下载到本机</string>
+    <string name="action_upload">上传到设备</string>
+    <string name="action_close">关闭</string>
+
+    <string name="action_key_home">主页</string>
+    <string name="action_key_back">返回</string>
+    <string name="action_key_power">电源</string>
+    <string name="action_key_volume_up">音量 +</string>
+    <string name="action_key_volume_down">音量 −</string>
+    <string name="action_reboot">重启设备</string>
+    <string name="action_reboot_recovery">重启到 Recovery</string>
+
+    <string name="section_install">安装 APK</string>
+    <string name="section_files">文件传输</string>
+    <string name="section_keys">快捷操作</string>
+    <string name="section_shell">Shell 命令</string>
+    <string name="screenshot_title">设备截图</string>
+
+    <string name="apk_hint">APK 路径，例如 /sdcard/download/app.apk</string>
+    <string name="remote_hint">设备上的路径，例如 /sdcard/Download/a.txt</string>
+    <string name="local_hint">本机路径（留空则使用应用目录），例如 /sdcard/momoadb/a.txt</string>
+    <string name="command_hint">输入 shell 命令，例如 getprop ro.product.model</string>
+    <string name="status_ready">就绪</string>
+    <string name="log_title">输出（方向键可滚动）</string>
+</resources>

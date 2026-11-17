@@ -6,10 +6,10 @@ labels:
 
 body:
   - type: input
-    id: skyadb_android
+    id: momoadb_android
     attributes:
-      label: 运行skyadb的设备信息
-      description: 运行 skyadb 的设备品牌、型号，以及安卓版本
+      label: 运行momoadb的设备信息
+      description: 运行 momoadb 的设备品牌、型号，以及安卓版本
       placeholder: "例如：小米14，Android 15"
     validations:
       required: true

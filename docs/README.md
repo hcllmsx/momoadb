@@ -64,7 +64,7 @@
 momoadb/
 ├── .github/workflows/
 │   ├── android-checks.yml       # push / PR：单元测试、Lint、Debug 构建
-│   └── android-ci.yml           # 手动正式发布：测试、Lint、签名构建、Release
+│   └── android-ci.yml           # 推 v* 标签或手动触发：测试、Lint、签名构建、Release
 ├── app/
 │   ├── build.gradle.kts         # SDK、版本、签名、依赖和资源收缩
 │   ├── proguard-rules.pro       # Release 混淆配置
@@ -86,6 +86,7 @@ momoadb/
 │       │   │   ├── repository/  # ADB 仓库接口与连接状态整合
 │       │   │   ├── scrcpy/      # 会话、协议、异步音视频解码和触控
 │       │   │   ├── ui/          # Compose 页面、ViewModel、组件与主题
+│       │   │   ├── update/      # 检查正式 Release 版本与版本号比较
 │       │   │   ├── usb/         # OTG 发现、授权和插拔事件
 │       │   │   └── validation/  # 网络、URL、路径和文件名校验
 │       │   └── res/             # 中英文资源、图标、主题与平台配置
@@ -232,7 +233,7 @@ momoadb/
 - Release 构建需要仓库 Secrets：`SIGNING_KEY_BASE64`、`KEY_ALIAS`、`KEY_STORE_PASSWORD`、`KEY_PASSWORD`。
 - 签名证书必须使用 PKCS#12 格式，不允许提交到仓库。
 - 提交前执行静态检查，至少确认 `git diff --check` 通过。
-- 本地支持构建、单元测试和 Lint；PR / push 自动执行检查，正式发布使用手动工作流。
+- 本地支持构建、单元测试和 Lint；PR / push 自动执行检查，正式发布由推送 `v*` 标签或手动工作流触发。
 
 ## 编码与换行规范
 
@@ -264,17 +265,18 @@ Debug 使用本地调试签名；未配置发布签名时，本地 Release APK �
 
 ## 发布规范
 
-- 当前本地默认版本号：`1.0.0`，`versionCode` 为 `10000`。
-- 正式发布由 GitHub Actions 手动触发。
-- 正式发布输入 `v主版本.次版本.修订版本`，CI 会写入 APK 的 `versionName` 和正式版 `versionCode`。
-- Release notes 根据上一个 `v*` tag 到当前提交之间的 commit message 自动生成。
-- Release APK 由 CI 使用 PKCS#12 证书签名后发布到 GitHub Releases。
+- 版本号唯一来源是根目录 `VERSION`（CalVer，形如 `26.11.16`），Gradle 构建时直接读取；`versionCode` 按 `((主 * 10000 + 次 * 100 + 修) * 10 + 9)` 计算。
+- 正式发布支持两种触发方式：推送 `v*` 标签，或在 Actions 中手动运行并填写标签（留空时按 `VERSION` 推导）。
+- 发布标签必须等于 `v` 加 `VERSION` 内容，不一致时工作流直接失败，避免 APK 版本与标签脱节。
+- Release 正文取自 `CHANGELOG.md` 中对应的 `## v<版本>` 小节，缺失时回退到提交记录。
+- Release APK 由 CI 使用 PKCS#12 证书签名后发布到 GitHub Releases，文件名保留 `v` 前缀。
 
 ## 当前风险与注意事项
 
 - 依赖统一由 `AppServices` 提供，服务使用应用上下文。
 - mDNS 自动发现依赖局域网 multicast / DNS-SD 支持，部分路由器、访客网络、热点隔离、跨网段场景可能无法发现服务；此时用户可继续使用网段扫描或在设置中手动配置网段。
 - 局域网扫描依赖网络拓扑，手机热点、旁路由、访客网络、跨网段场景需要用户在设置中手动配置网段。
+- 更新检查读取 GitHub 正式 Release 的 tag：代理镜像不可用且官方接口触发限额时静默失败，不影响任何功能；发布前的版本不会被视为可更新版本。
 - 本机应用安装到目标设备当前只支持用户应用的单 APK 导出；Split APK / App Bundle 不在当前范围。
 - Shell 是单条命令执行，不是交互式终端。
 - 设备断线后的主动心跳和自动重连当前未作为常驻功能实现，避免增加耗电和后台复杂度。

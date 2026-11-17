@@ -1,12 +1,15 @@
 name: Android 正式版发布
 
 on:
+  push:
+    tags:
+      - "v*"
   workflow_dispatch:
     inputs:
       tag:
-        description: "正式版本标签，例如 v1.0.0。"
-        required: true
-        default: "v1.0.0"
+        description: "正式版本标签，例如 v1.0.0；留空则按 VERSION 推导。"
+        required: false
+        default: ""
 
 permissions:
   contents: write
@@ -68,41 +71,55 @@ jobs:
       - name: 运行 Android Lint
         run: ./gradlew --no-daemon lintRelease
 
+      - name: 解析并校验发布版本
+        id: version
+        env:
+          TAG_INPUT: ${{ inputs.tag }}
+          REF_NAME: ${{ github.ref_name }}
+          REF_TYPE: ${{ github.ref_type }}
+        run: |
+          set -euo pipefail
+          RELEASE_TAG="$(echo "${TAG_INPUT:-}" | xargs)"
+          if [[ -z "${RELEASE_TAG}" && "${REF_TYPE}" == "tag" ]]; then
+            RELEASE_TAG="${REF_NAME}"
+          fi
+          FILE_VERSION="$(tr -d '[:space:]' < VERSION)"
+          if [[ -z "${RELEASE_TAG}" ]]; then
+            RELEASE_TAG="v${FILE_VERSION}"
+          fi
+          if [[ ! "${RELEASE_TAG}" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "正式版本标签必须形如 v主.次.修订，例如 v26.11.16。" >&2
+            exit 1
+          fi
+          VERSION_NO_V="${RELEASE_TAG#v}"
+          if [[ "${VERSION_NO_V}" != "${FILE_VERSION}" ]]; then
+            echo "版本标签 ${RELEASE_TAG} 与 VERSION 文件 ${FILE_VERSION} 不一致，请先同步后再发布。" >&2
+            exit 1
+          fi
+          IFS='.' read -r MAJOR MINOR PATCH <<< "${VERSION_NO_V}"
+          VERSION_CODE=$(((MAJOR * 10000 + MINOR * 100 + PATCH) * 10 + 9))
+          echo "tag=${RELEASE_TAG}" >> "$GITHUB_OUTPUT"
+          echo "version=${VERSION_NO_V}" >> "$GITHUB_OUTPUT"
+          echo "code=${VERSION_CODE}" >> "$GITHUB_OUTPUT"
+          echo "发布版本：${RELEASE_TAG}（versionCode ${VERSION_CODE}）"
+
       - name: 构建 Release APK
         env:
-          VERSION_NAME: ${{ inputs.tag }}
+          VERSION_NAME: ${{ steps.version.outputs.version }}
+          VERSION_CODE: ${{ steps.version.outputs.code }}
           SIGNING_STORE_FILE: ${{ runner.temp }}/signing/release.p12
           KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
           KEY_STORE_PASSWORD: ${{ secrets.KEY_STORE_PASSWORD }}
           KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
-        run: |
-          set -euo pipefail
-          RELEASE_TAG="$(echo "${VERSION_NAME}" | xargs)"
-          if [[ ! "${RELEASE_TAG}" =~ ^v ]]; then
-            echo "正式版本标签必须以 v 开头，例如 v1.0.0。" >&2
-            exit 1
-          fi
-          VERSION_NAME="${RELEASE_TAG#v}"
-          if [[ ! "${VERSION_NAME}" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
-            echo "版本标签必须是 v主版本.次版本.修订版本，例如 v1.0.0。" >&2
-            exit 1
-          fi
-          IFS='.' read -r MAJOR MINOR PATCH <<< "${VERSION_NAME}"
-          VERSION_CODE=$(((MAJOR * 10000 + MINOR * 100 + PATCH) * 10 + 9))
-          export VERSION_NAME VERSION_CODE
-          ./gradlew --no-daemon assembleRelease
+        run: ./gradlew --no-daemon assembleRelease
 
       - name: 发布正式版 APK 到 GitHub Releases
         env:
           GH_TOKEN: ${{ github.token }}
-          RELEASE_TAG_INPUT: ${{ inputs.tag }}
+          RELEASE_TAG: ${{ steps.version.outputs.tag }}
+          VERSION_NO_V: ${{ steps.version.outputs.version }}
         run: |
           set -euo pipefail
-          RELEASE_TAG="$(echo "${RELEASE_TAG_INPUT}" | xargs)"
-          if [[ -z "${RELEASE_TAG}" ]]; then
-            echo "版本标签不能为空。" >&2
-            exit 1
-          fi
           APK_PATH="$(find app/build/outputs/apk/release -name '*.apk' | head -n 1)"
           LITE_APK_PATH="$(find lite/build/outputs/apk/release -name '*.apk' | head -n 1)"
           if [[ -z "${APK_PATH}" || -z "${LITE_APK_PATH}" ]]; then
@@ -115,7 +132,6 @@ jobs:
           APK_PATH="momoadb-${RELEASE_TAG}.apk"
           LITE_APK_PATH="momoadb-lite-${RELEASE_TAG}.apk"
           RELEASE_TITLE="默默ADB ${RELEASE_TAG}"
-          VERSION_NO_V="${RELEASE_TAG#v}"
 
           # Release 正文优先取 CHANGELOG.md 中本次版本的小节，保证说明与版本一一对应。
           CHANGELOG_TEXT="$(awk -v heading="## v${VERSION_NO_V}" '

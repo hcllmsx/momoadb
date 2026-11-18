@@ -77,6 +77,20 @@
     <string name="home_ip_label">IP address</string>
     <string name="action_wireless_pairing">Pair</string>
     <string name="action_discover_devices">Discover</string>
+    <string name="action_scan_connect">Scan QR</string>
+    <string name="home_scan_prompt">Align the QR code shown on the TV within the frame</string>
+    <string name="home_scan_unrecognized">Unrecognized QR content. Enter the IP and port manually.</string>
+    <string name="action_show_qr">Show QR code</string>
+    <string name="qr_screen_title">Device QR code</string>
+    <string name="qr_model_label">Model</string>
+    <string name="qr_android_label">System</string>
+    <string name="qr_port_label">ADB port</string>
+    <string name="qr_image_desc">QR code for connecting to this device</string>
+    <string name="qr_no_network">No local network IP detected. Check Wi-Fi or the network connection.</string>
+    <string name="qr_status_open">Network ADB is on (port 5555). Other devices can scan this code or enter the IP manually to connect.</string>
+    <string name="qr_status_closed">Network ADB not detected (port 5555 is closed). Enable Wireless debugging or network ADB in Developer options, then tap Refresh.</string>
+    <string name="qr_caption">Scan this QR code with "Scan QR" on another device running 默默ADB to fill in the address and connect automatically.</string>
+    <string name="qr_multi_ip">Multiple IPs detected. The QR code uses the first one; enter the correct IP manually if it is wrong.</string>
     <string name="home_recent_devices_title">Recent devices</string>
     <string name="home_no_recent_devices">No device history</string>
 

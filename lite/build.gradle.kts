@@ -77,4 +77,6 @@ android {
 
 dependencies {
     testImplementation(libs.junit)
+    // 仅测试期使用：验证 QrCode 生成的矩阵能被标准解码器读取，不进入 APK。
+    testImplementation(libs.zxing.core)
 }

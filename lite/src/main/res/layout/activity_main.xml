@@ -2,6 +2,9 @@
 <!--
   电视 / 盒子大屏布局：控件大、横向排布，遥控器只需上下左右移动。
   Android 4.4（API 19）只用系统自带控件，不引入 AndroidX。
+
+  页面结构：首页（本机连接信息 + 二维码，被控端展示）与高级功能页
+  （原有的 ADB 客户端操作）通过外层 FrameLayout 切换显示，日志区两页共用。
 -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
@@ -10,407 +13,563 @@
     android:orientation="vertical"
     android:padding="24dp">
 
-    <ScrollView
-        android:id="@+id/controls"
+    <FrameLayout
+        android:id="@+id/page_host"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="1"
-        android:fadeScrollbars="false">
+        android:layout_weight="1">
 
-        <LinearLayout
+        <!-- 首页：被控端展示本机地址，供手机端扫码或手动输入连接 -->
+        <ScrollView
+            android:id="@+id/home_page"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical">
+            android:layout_height="match_parent"
+            android:fadeScrollbars="false">
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/title"
-                android:textColor="@color/text_primary"
-                android:textSize="26sp"
-                android:textStyle="bold" />
-
-            <TextView
-                android:id="@+id/subtitle"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="4dp"
-                android:text="@string/subtitle"
-                android:textColor="@color/text_secondary"
-                android:textSize="14sp" />
-
-            <!-- 连接 -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                android:orientation="horizontal">
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/title"
+                    android:textColor="@color/text_primary"
+                    android:textSize="26sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/subtitle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:text="@string/subtitle"
+                    android:textColor="@color/text_secondary"
+                    android:textSize="14sp" />
+
+                <TextView
+                    style="@style/SectionTitle"
+                    android:text="@string/home_section_info" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/field_bg"
+                    android:orientation="horizontal"
+                    android:padding="16dp">
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:id="@+id/info_model"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textColor="@color/text_primary"
+                            android:textSize="18sp" />
+
+                        <TextView
+                            android:id="@+id/info_android"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="4dp"
+                            android:textColor="@color/text_secondary"
+                            android:textSize="15sp" />
+
+                        <TextView
+                            android:id="@+id/info_ip"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="10dp"
+                            android:fontFamily="monospace"
+                            android:textColor="@color/accent"
+                            android:textSize="24sp" />
+
+                        <TextView
+                            android:id="@+id/info_port"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="4dp"
+                            android:textColor="@color/text_secondary"
+                            android:textSize="15sp" />
+
+                        <TextView
+                            android:id="@+id/adb_status"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="10dp"
+                            android:textColor="@color/text_secondary"
+                            android:textSize="15sp" />
+                    </LinearLayout>
+
+                    <ImageView
+                        android:id="@+id/qr"
+                        android:layout_width="260dp"
+                        android:layout_height="260dp"
+                        android:layout_marginLeft="16dp"
+                        android:background="@color/qr_bg"
+                        android:contentDescription="@string/qr_desc"
+                        android:scaleType="fitCenter" />
+                </LinearLayout>
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:text="@string/qr_caption"
+                    android:textColor="@color/text_secondary"
+                    android:textSize="14sp" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:orientation="horizontal">
+
+                    <Button
+                        android:id="@+id/btn_refresh"
+                        android:layout_width="0dp"
+                        android:layout_height="56dp"
+                        android:layout_weight="1"
+                        android:background="@drawable/field_bg"
+                        android:focusable="true"
+                        android:text="@string/action_refresh"
+                        android:textColor="@color/text_primary"
+                        android:textSize="18sp" />
+
+                    <Button
+                        android:id="@+id/btn_advanced"
+                        android:layout_width="0dp"
+                        android:layout_height="56dp"
+                        android:layout_marginLeft="10dp"
+                        android:layout_weight="1"
+                        android:background="@drawable/field_bg"
+                        android:focusable="true"
+                        android:text="@string/action_advanced"
+                        android:textColor="@color/text_primary"
+                        android:textSize="18sp" />
+                </LinearLayout>
+            </LinearLayout>
+        </ScrollView>
+
+        <!-- 高级功能页：原有的 ADB 客户端完整操作 -->
+        <ScrollView
+            android:id="@+id/advanced_page"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:fadeScrollbars="false"
+            android:visibility="gone">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <Button
+                        android:id="@+id/btn_back_home"
+                        android:layout_width="140dp"
+                        android:layout_height="52dp"
+                        android:background="@drawable/field_bg"
+                        android:focusable="true"
+                        android:text="@string/action_back_home"
+                        android:textColor="@color/text_primary"
+                        android:textSize="17sp" />
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:gravity="center_vertical"
+                        android:paddingLeft="12dp"
+                        android:text="@string/advanced_title"
+                        android:textColor="@color/text_primary"
+                        android:textSize="20sp"
+                        android:textStyle="bold" />
+                </LinearLayout>
+
+                <!-- 连接 -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:orientation="horizontal">
+
+                    <EditText
+                        android:id="@+id/host"
+                        android:layout_width="0dp"
+                        android:layout_height="56dp"
+                        android:layout_weight="1"
+                        android:background="@drawable/input_bg"
+                        android:hint="@string/host_hint"
+                        android:imeOptions="actionNext"
+                        android:inputType="textUri"
+                        android:paddingLeft="14dp"
+                        android:paddingRight="14dp"
+                        android:singleLine="true"
+                        android:textColor="@color/text_primary"
+                        android:textColorHint="@color/text_secondary"
+                        android:textSize="18sp" />
+
+                    <EditText
+                        android:id="@+id/port"
+                        android:layout_width="110dp"
+                        android:layout_height="56dp"
+                        android:layout_marginLeft="10dp"
+                        android:background="@drawable/input_bg"
+                        android:hint="@string/port_hint"
+                        android:imeOptions="actionDone"
+                        android:inputType="number"
+                        android:paddingLeft="14dp"
+                        android:paddingRight="14dp"
+                        android:singleLine="true"
+                        android:text="5555"
+                        android:textColor="@color/text_primary"
+                        android:textColorHint="@color/text_secondary"
+                        android:textSize="18sp" />
+
+                    <Button
+                        android:id="@+id/connect"
+                        android:layout_width="130dp"
+                        android:layout_height="56dp"
+                        android:layout_marginLeft="10dp"
+                        android:background="@drawable/field_bg"
+                        android:focusable="true"
+                        android:text="@string/action_connect"
+                        android:textColor="@color/text_primary"
+                        android:textSize="18sp" />
+                </LinearLayout>
+
+                <!-- 常用操作 -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:orientation="horizontal">
+
+                    <Button
+                        android:id="@+id/device_info"
+                        android:layout_width="0dp"
+                        android:layout_height="54dp"
+                        android:layout_weight="1"
+                        android:background="@drawable/field_bg"
+                        android:focusable="true"
+                        android:text="@string/action_device_info"
+                        android:textColor="@color/text_primary"
+                        android:textSize="17sp" />
+
+                    <Button
+                        android:id="@+id/screenshot"
+                        android:layout_width="0dp"
+                        android:layout_height="54dp"
+                        android:layout_marginLeft="10dp"
+                        android:layout_weight="1"
+                        android:background="@drawable/field_bg"
+                        android:focusable="true"
+                        android:text="@string/action_screenshot"
+                        android:textColor="@color/text_primary"
+                        android:textSize="17sp" />
+
+                    <Button
+                        android:id="@+id/disconnect"
+                        android:layout_width="0dp"
+                        android:layout_height="54dp"
+                        android:layout_marginLeft="10dp"
+                        android:layout_weight="1"
+                        android:background="@drawable/field_bg"
+                        android:focusable="true"
+                        android:text="@string/action_disconnect"
+                        android:textColor="@color/text_primary"
+                        android:textSize="17sp" />
+                </LinearLayout>
+
+                <!-- 安装 APK -->
+                <TextView
+                    style="@style/SectionTitle"
+                    android:text="@string/section_install" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <EditText
+                        android:id="@+id/apk_path"
+                        android:layout_width="0dp"
+                        android:layout_height="56dp"
+                        android:layout_weight="1"
+                        android:background="@drawable/input_bg"
+                        android:hint="@string/apk_hint"
+                        android:inputType="textUri"
+                        android:paddingLeft="14dp"
+                        android:paddingRight="14dp"
+                        android:singleLine="true"
+                        android:textColor="@color/text_primary"
+                        android:textColorHint="@color/text_secondary"
+                        android:textSize="16sp" />
+
+                    <Button
+                        android:id="@+id/pick_apk"
+                        android:layout_width="100dp"
+                        android:layout_height="56dp"
+                        android:layout_marginLeft="10dp"
+                        android:background="@drawable/field_bg"
+                        android:focusable="true"
+                        android:text="@string/action_pick"
+                        android:textColor="@color/text_primary"
+                        android:textSize="17sp" />
+
+                    <Button
+                        android:id="@+id/install_apk"
+                        android:layout_width="110dp"
+                        android:layout_height="56dp"
+                        android:layout_marginLeft="10dp"
+                        android:background="@drawable/field_bg"
+                        android:focusable="true"
+                        android:text="@string/action_install"
+                        android:textColor="@color/text_primary"
+                        android:textSize="17sp" />
+                </LinearLayout>
+
+                <!-- 文件传输 -->
+                <TextView
+                    style="@style/SectionTitle"
+                    android:text="@string/section_files" />
 
                 <EditText
-                    android:id="@+id/host"
-                    android:layout_width="0dp"
-                    android:layout_height="56dp"
-                    android:layout_weight="1"
+                    android:id="@+id/remote_path"
+                    android:layout_width="match_parent"
+                    android:layout_height="54dp"
                     android:background="@drawable/input_bg"
-                    android:hint="@string/host_hint"
-                    android:imeOptions="actionNext"
+                    android:hint="@string/remote_hint"
                     android:inputType="textUri"
                     android:paddingLeft="14dp"
                     android:paddingRight="14dp"
                     android:singleLine="true"
-                    android:textColor="@color/text_primary"
-                    android:textColorHint="@color/text_secondary"
-                    android:textSize="18sp" />
-
-                <EditText
-                    android:id="@+id/port"
-                    android:layout_width="110dp"
-                    android:layout_height="56dp"
-                    android:layout_marginLeft="10dp"
-                    android:background="@drawable/input_bg"
-                    android:hint="@string/port_hint"
-                    android:imeOptions="actionDone"
-                    android:inputType="number"
-                    android:paddingLeft="14dp"
-                    android:paddingRight="14dp"
-                    android:singleLine="true"
-                    android:text="5555"
-                    android:textColor="@color/text_primary"
-                    android:textColorHint="@color/text_secondary"
-                    android:textSize="18sp" />
-
-                <Button
-                    android:id="@+id/connect"
-                    android:layout_width="130dp"
-                    android:layout_height="56dp"
-                    android:layout_marginLeft="10dp"
-                    android:background="@drawable/field_bg"
-                    android:focusable="true"
-                    android:text="@string/action_connect"
-                    android:textColor="@color/text_primary"
-                    android:textSize="18sp" />
-            </LinearLayout>
-
-            <!-- 常用操作 -->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="10dp"
-                android:orientation="horizontal">
-
-                <Button
-                    android:id="@+id/device_info"
-                    android:layout_width="0dp"
-                    android:layout_height="54dp"
-                    android:layout_weight="1"
-                    android:background="@drawable/field_bg"
-                    android:focusable="true"
-                    android:text="@string/action_device_info"
-                    android:textColor="@color/text_primary"
-                    android:textSize="17sp" />
-
-                <Button
-                    android:id="@+id/screenshot"
-                    android:layout_width="0dp"
-                    android:layout_height="54dp"
-                    android:layout_marginLeft="10dp"
-                    android:layout_weight="1"
-                    android:background="@drawable/field_bg"
-                    android:focusable="true"
-                    android:text="@string/action_screenshot"
-                    android:textColor="@color/text_primary"
-                    android:textSize="17sp" />
-
-                <Button
-                    android:id="@+id/disconnect"
-                    android:layout_width="0dp"
-                    android:layout_height="54dp"
-                    android:layout_marginLeft="10dp"
-                    android:layout_weight="1"
-                    android:background="@drawable/field_bg"
-                    android:focusable="true"
-                    android:text="@string/action_disconnect"
-                    android:textColor="@color/text_primary"
-                    android:textSize="17sp" />
-            </LinearLayout>
-
-            <!-- 安装 APK -->
-            <TextView
-                style="@style/SectionTitle"
-                android:text="@string/section_install" />
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal">
-
-                <EditText
-                    android:id="@+id/apk_path"
-                    android:layout_width="0dp"
-                    android:layout_height="56dp"
-                    android:layout_weight="1"
-                    android:background="@drawable/input_bg"
-                    android:hint="@string/apk_hint"
-                    android:inputType="textUri"
-                    android:paddingLeft="14dp"
-                    android:paddingRight="14dp"
-                    android:singleLine="true"
+                    android:text="/sdcard/"
                     android:textColor="@color/text_primary"
                     android:textColorHint="@color/text_secondary"
                     android:textSize="16sp" />
 
-                <Button
-                    android:id="@+id/pick_apk"
-                    android:layout_width="100dp"
-                    android:layout_height="56dp"
-                    android:layout_marginLeft="10dp"
-                    android:background="@drawable/field_bg"
-                    android:focusable="true"
-                    android:text="@string/action_pick"
-                    android:textColor="@color/text_primary"
-                    android:textSize="17sp" />
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:orientation="horizontal">
 
-                <Button
-                    android:id="@+id/install_apk"
-                    android:layout_width="110dp"
-                    android:layout_height="56dp"
-                    android:layout_marginLeft="10dp"
-                    android:background="@drawable/field_bg"
-                    android:focusable="true"
-                    android:text="@string/action_install"
-                    android:textColor="@color/text_primary"
-                    android:textSize="17sp" />
+                    <EditText
+                        android:id="@+id/local_path"
+                        android:layout_width="0dp"
+                        android:layout_height="54dp"
+                        android:layout_weight="1"
+                        android:background="@drawable/input_bg"
+                        android:hint="@string/local_hint"
+                        android:inputType="textUri"
+                        android:paddingLeft="14dp"
+                        android:paddingRight="14dp"
+                        android:singleLine="true"
+                        android:textColor="@color/text_primary"
+                        android:textColorHint="@color/text_secondary"
+                        android:textSize="16sp" />
+
+                    <Button
+                        android:id="@+id/download_file"
+                        android:layout_width="130dp"
+                        android:layout_height="54dp"
+                        android:layout_marginLeft="10dp"
+                        android:background="@drawable/field_bg"
+                        android:focusable="true"
+                        android:text="@string/action_download"
+                        android:textColor="@color/text_primary"
+                        android:textSize="17sp" />
+
+                    <Button
+                        android:id="@+id/upload_file"
+                        android:layout_width="130dp"
+                        android:layout_height="54dp"
+                        android:layout_marginLeft="10dp"
+                        android:background="@drawable/field_bg"
+                        android:focusable="true"
+                        android:text="@string/action_upload"
+                        android:textColor="@color/text_primary"
+                        android:textSize="17sp" />
+                </LinearLayout>
+
+                <!-- 快捷操作 -->
+                <TextView
+                    style="@style/SectionTitle"
+                    android:text="@string/section_keys" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <Button
+                        android:id="@+id/key_home"
+                        android:layout_width="0dp"
+                        android:layout_height="54dp"
+                        android:layout_weight="1"
+                        android:background="@drawable/field_bg"
+                        android:focusable="true"
+                        android:text="@string/action_key_home"
+                        android:textColor="@color/text_primary"
+                        android:textSize="17sp" />
+
+                    <Button
+                        android:id="@+id/key_back"
+                        android:layout_width="0dp"
+                        android:layout_height="54dp"
+                        android:layout_marginLeft="10dp"
+                        android:layout_weight="1"
+                        android:background="@drawable/field_bg"
+                        android:focusable="true"
+                        android:text="@string/action_key_back"
+                        android:textColor="@color/text_primary"
+                        android:textSize="17sp" />
+
+                    <Button
+                        android:id="@+id/key_power"
+                        android:layout_width="0dp"
+                        android:layout_height="54dp"
+                        android:layout_marginLeft="10dp"
+                        android:layout_weight="1"
+                        android:background="@drawable/field_bg"
+                        android:focusable="true"
+                        android:text="@string/action_key_power"
+                        android:textColor="@color/text_primary"
+                        android:textSize="17sp" />
+
+                    <Button
+                        android:id="@+id/key_volume_up"
+                        android:layout_width="0dp"
+                        android:layout_height="54dp"
+                        android:layout_marginLeft="10dp"
+                        android:layout_weight="1"
+                        android:background="@drawable/field_bg"
+                        android:focusable="true"
+                        android:text="@string/action_key_volume_up"
+                        android:textColor="@color/text_primary"
+                        android:textSize="17sp" />
+
+                    <Button
+                        android:id="@+id/key_volume_down"
+                        android:layout_width="0dp"
+                        android:layout_height="54dp"
+                        android:layout_marginLeft="10dp"
+                        android:layout_weight="1"
+                        android:background="@drawable/field_bg"
+                        android:focusable="true"
+                        android:text="@string/action_key_volume_down"
+                        android:textColor="@color/text_primary"
+                        android:textSize="17sp" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:orientation="horizontal">
+
+                    <Button
+                        android:id="@+id/reboot"
+                        android:layout_width="0dp"
+                        android:layout_height="54dp"
+                        android:layout_weight="1"
+                        android:background="@drawable/field_bg"
+                        android:focusable="true"
+                        android:text="@string/action_reboot"
+                        android:textColor="@color/text_primary"
+                        android:textSize="17sp" />
+
+                    <Button
+                        android:id="@+id/reboot_recovery"
+                        android:layout_width="0dp"
+                        android:layout_height="54dp"
+                        android:layout_marginLeft="10dp"
+                        android:layout_weight="1"
+                        android:background="@drawable/field_bg"
+                        android:focusable="true"
+                        android:text="@string/action_reboot_recovery"
+                        android:textColor="@color/text_primary"
+                        android:textSize="17sp" />
+
+                    <Button
+                        android:id="@+id/clear"
+                        android:layout_width="0dp"
+                        android:layout_height="54dp"
+                        android:layout_marginLeft="10dp"
+                        android:layout_weight="1"
+                        android:background="@drawable/field_bg"
+                        android:focusable="true"
+                        android:text="@string/action_clear"
+                        android:textColor="@color/text_primary"
+                        android:textSize="17sp" />
+                </LinearLayout>
+
+                <!-- 命令 -->
+                <TextView
+                    style="@style/SectionTitle"
+                    android:text="@string/section_shell" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <EditText
+                        android:id="@+id/command"
+                        android:layout_width="0dp"
+                        android:layout_height="56dp"
+                        android:layout_weight="1"
+                        android:background="@drawable/input_bg"
+                        android:hint="@string/command_hint"
+                        android:imeOptions="actionDone"
+                        android:inputType="text"
+                        android:paddingLeft="14dp"
+                        android:paddingRight="14dp"
+                        android:singleLine="true"
+                        android:textColor="@color/text_primary"
+                        android:textColorHint="@color/text_secondary"
+                        android:textSize="17sp" />
+
+                    <Button
+                        android:id="@+id/run"
+                        android:layout_width="110dp"
+                        android:layout_height="56dp"
+                        android:layout_marginLeft="10dp"
+                        android:background="@drawable/field_bg"
+                        android:focusable="true"
+                        android:text="@string/action_run"
+                        android:textColor="@color/text_primary"
+                        android:textSize="17sp" />
+                </LinearLayout>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:text="@string/log_title"
+                    android:textColor="@color/text_secondary"
+                    android:textSize="13sp" />
             </LinearLayout>
+        </ScrollView>
+    </FrameLayout>
 
-            <!-- 文件传输 -->
-            <TextView
-                style="@style/SectionTitle"
-                android:text="@string/section_files" />
-
-            <EditText
-                android:id="@+id/remote_path"
-                android:layout_width="match_parent"
-                android:layout_height="54dp"
-                android:background="@drawable/input_bg"
-                android:hint="@string/remote_hint"
-                android:inputType="textUri"
-                android:paddingLeft="14dp"
-                android:paddingRight="14dp"
-                android:singleLine="true"
-                android:text="/sdcard/"
-                android:textColor="@color/text_primary"
-                android:textColorHint="@color/text_secondary"
-                android:textSize="16sp" />
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="10dp"
-                android:orientation="horizontal">
-
-                <EditText
-                    android:id="@+id/local_path"
-                    android:layout_width="0dp"
-                    android:layout_height="54dp"
-                    android:layout_weight="1"
-                    android:background="@drawable/input_bg"
-                    android:hint="@string/local_hint"
-                    android:inputType="textUri"
-                    android:paddingLeft="14dp"
-                    android:paddingRight="14dp"
-                    android:singleLine="true"
-                    android:textColor="@color/text_primary"
-                    android:textColorHint="@color/text_secondary"
-                    android:textSize="16sp" />
-
-                <Button
-                    android:id="@+id/download_file"
-                    android:layout_width="130dp"
-                    android:layout_height="54dp"
-                    android:layout_marginLeft="10dp"
-                    android:background="@drawable/field_bg"
-                    android:focusable="true"
-                    android:text="@string/action_download"
-                    android:textColor="@color/text_primary"
-                    android:textSize="17sp" />
-
-                <Button
-                    android:id="@+id/upload_file"
-                    android:layout_width="130dp"
-                    android:layout_height="54dp"
-                    android:layout_marginLeft="10dp"
-                    android:background="@drawable/field_bg"
-                    android:focusable="true"
-                    android:text="@string/action_upload"
-                    android:textColor="@color/text_primary"
-                    android:textSize="17sp" />
-            </LinearLayout>
-
-            <!-- 快捷操作 -->
-            <TextView
-                style="@style/SectionTitle"
-                android:text="@string/section_keys" />
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal">
-
-                <Button
-                    android:id="@+id/key_home"
-                    android:layout_width="0dp"
-                    android:layout_height="54dp"
-                    android:layout_weight="1"
-                    android:background="@drawable/field_bg"
-                    android:focusable="true"
-                    android:text="@string/action_key_home"
-                    android:textColor="@color/text_primary"
-                    android:textSize="17sp" />
-
-                <Button
-                    android:id="@+id/key_back"
-                    android:layout_width="0dp"
-                    android:layout_height="54dp"
-                    android:layout_marginLeft="10dp"
-                    android:layout_weight="1"
-                    android:background="@drawable/field_bg"
-                    android:focusable="true"
-                    android:text="@string/action_key_back"
-                    android:textColor="@color/text_primary"
-                    android:textSize="17sp" />
-
-                <Button
-                    android:id="@+id/key_power"
-                    android:layout_width="0dp"
-                    android:layout_height="54dp"
-                    android:layout_marginLeft="10dp"
-                    android:layout_weight="1"
-                    android:background="@drawable/field_bg"
-                    android:focusable="true"
-                    android:text="@string/action_key_power"
-                    android:textColor="@color/text_primary"
-                    android:textSize="17sp" />
-
-                <Button
-                    android:id="@+id/key_volume_up"
-                    android:layout_width="0dp"
-                    android:layout_height="54dp"
-                    android:layout_marginLeft="10dp"
-                    android:layout_weight="1"
-                    android:background="@drawable/field_bg"
-                    android:focusable="true"
-                    android:text="@string/action_key_volume_up"
-                    android:textColor="@color/text_primary"
-                    android:textSize="17sp" />
-
-                <Button
-                    android:id="@+id/key_volume_down"
-                    android:layout_width="0dp"
-                    android:layout_height="54dp"
-                    android:layout_marginLeft="10dp"
-                    android:layout_weight="1"
-                    android:background="@drawable/field_bg"
-                    android:focusable="true"
-                    android:text="@string/action_key_volume_down"
-                    android:textColor="@color/text_primary"
-                    android:textSize="17sp" />
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="10dp"
-                android:orientation="horizontal">
-
-                <Button
-                    android:id="@+id/reboot"
-                    android:layout_width="0dp"
-                    android:layout_height="54dp"
-                    android:layout_weight="1"
-                    android:background="@drawable/field_bg"
-                    android:focusable="true"
-                    android:text="@string/action_reboot"
-                    android:textColor="@color/text_primary"
-                    android:textSize="17sp" />
-
-                <Button
-                    android:id="@+id/reboot_recovery"
-                    android:layout_width="0dp"
-                    android:layout_height="54dp"
-                    android:layout_marginLeft="10dp"
-                    android:layout_weight="1"
-                    android:background="@drawable/field_bg"
-                    android:focusable="true"
-                    android:text="@string/action_reboot_recovery"
-                    android:textColor="@color/text_primary"
-                    android:textSize="17sp" />
-
-                <Button
-                    android:id="@+id/clear"
-                    android:layout_width="0dp"
-                    android:layout_height="54dp"
-                    android:layout_marginLeft="10dp"
-                    android:layout_weight="1"
-                    android:background="@drawable/field_bg"
-                    android:focusable="true"
-                    android:text="@string/action_clear"
-                    android:textColor="@color/text_primary"
-                    android:textSize="17sp" />
-            </LinearLayout>
-
-            <!-- 命令 -->
-            <TextView
-                style="@style/SectionTitle"
-                android:text="@string/section_shell" />
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal">
-
-                <EditText
-                    android:id="@+id/command"
-                    android:layout_width="0dp"
-                    android:layout_height="56dp"
-                    android:layout_weight="1"
-                    android:background="@drawable/input_bg"
-                    android:hint="@string/command_hint"
-                    android:imeOptions="actionDone"
-                    android:inputType="text"
-                    android:paddingLeft="14dp"
-                    android:paddingRight="14dp"
-                    android:singleLine="true"
-                    android:textColor="@color/text_primary"
-                    android:textColorHint="@color/text_secondary"
-                    android:textSize="17sp" />
-
-                <Button
-                    android:id="@+id/run"
-                    android:layout_width="110dp"
-                    android:layout_height="56dp"
-                    android:layout_marginLeft="10dp"
-                    android:background="@drawable/field_bg"
-                    android:focusable="true"
-                    android:text="@string/action_run"
-                    android:textColor="@color/text_primary"
-                    android:textSize="17sp" />
-            </LinearLayout>
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                android:text="@string/log_title"
-                android:textColor="@color/text_secondary"
-                android:textSize="13sp" />
-        </LinearLayout>
-    </ScrollView>
-
+    <!-- 日志区：两页共用，始终显示在底部 -->
     <ScrollView
         android:id="@+id/log_scroll"
         android:layout_width="match_parent"
-        android:layout_height="180dp"
-        android:layout_marginTop="6dp"
+        android:layout_height="170dp"
+        android:layout_marginTop="10dp"
         android:background="@drawable/log_bg"
         android:fadeScrollbars="false"
         android:focusable="true"

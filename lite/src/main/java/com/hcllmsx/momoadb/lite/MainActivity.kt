@@ -6,7 +6,9 @@ import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.graphics.Color
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -23,11 +25,18 @@ import android.widget.Toast
 import com.hcllmsx.momoadb.lite.adb.AdbConnection
 import com.hcllmsx.momoadb.lite.adb.AdbCrypto
 import java.io.File
+import java.net.Inet4Address
+import java.net.InetSocketAddress
+import java.net.NetworkInterface
+import java.net.Socket
 import java.util.concurrent.Executors
 
 /**
- * 轻量版主界面：连接一台 Android 4.4 设备，提供设备信息、截图、APK 安装、
- * 文件上传下载、按键模拟、重启与 shell 命令。
+ * 轻量版主界面，分两页：
+ * 1. 首页（被控端）：展示本机连接信息与二维码，供手机端「默默ADB」扫码或手动输入连接，
+ *    并检测网络 ADB（端口 5555）是否开启；
+ * 2. 高级功能页：连接一台 Android 4.4 设备，提供设备信息、截图、APK 安装、
+ *    文件上传下载、按键模拟、重启与 shell 命令。
  *
  * 所有网络与认证都在单线程池里做，结果回到主线程刷新界面，
  * 因此不需要任何协程或 AndroidX 组件。
@@ -47,6 +56,22 @@ class MainActivity : Activity() {
     private lateinit var logScroll: ScrollView
     private lateinit var statusView: TextView
     private lateinit var connectButton: Button
+
+    private lateinit var homePage: View
+    private lateinit var advancedPage: View
+    private lateinit var infoModelView: TextView
+    private lateinit var infoAndroidView: TextView
+    private lateinit var infoIpView: TextView
+    private lateinit var infoPortView: TextView
+    private lateinit var adbStatusView: TextView
+    private lateinit var qrView: ImageView
+    private lateinit var refreshButton: Button
+    private lateinit var advancedButton: Button
+    private lateinit var backHomeButton: Button
+
+    /** 递增的刷新代数，用于丢弃过期的后台刷新结果。 */
+    @Volatile
+    private var refreshGeneration = 0
 
     @Volatile
     private var connection: AdbConnection? = null
@@ -74,12 +99,33 @@ class MainActivity : Activity() {
         statusView = findViewById(R.id.status)
         connectButton = findViewById(R.id.connect)
 
+        homePage = findViewById(R.id.home_page)
+        advancedPage = findViewById(R.id.advanced_page)
+        infoModelView = findViewById(R.id.info_model)
+        infoAndroidView = findViewById(R.id.info_android)
+        infoIpView = findViewById(R.id.info_ip)
+        infoPortView = findViewById(R.id.info_port)
+        adbStatusView = findViewById(R.id.adb_status)
+        qrView = findViewById(R.id.qr)
+        refreshButton = findViewById(R.id.btn_refresh)
+        advancedButton = findViewById(R.id.btn_advanced)
+        backHomeButton = findViewById(R.id.btn_back_home)
+
         val prefs = getSharedPreferences(PrefsName, Context.MODE_PRIVATE)
         hostInput.setText(prefs.getString(KeyHost, ""))
         portInput.setText(prefs.getString(KeyPort, DefaultPort.toString()))
 
         findViewById<TextView>(R.id.subtitle).text =
             getString(R.string.subtitle) + "  ·  v" + BuildConfig.VERSION_NAME
+
+        // 首页：本机连接信息与二维码。
+        infoModelView.text = getString(R.string.info_model_label) + Build.MODEL
+        infoAndroidView.text = "Android " + Build.VERSION.RELEASE
+        infoPortView.text = getString(R.string.info_port_label)
+        refreshButton.setOnClickListener { refreshHomeInfo() }
+        advancedButton.setOnClickListener { showAdvanced(true) }
+        backHomeButton.setOnClickListener { showAdvanced(false) }
+        refreshHomeInfo()
 
         connectButton.setOnClickListener { doConnect() }
         findViewById<Button>(R.id.disconnect).setOnClickListener { doDisconnect() }
@@ -108,11 +154,12 @@ class MainActivity : Activity() {
             }
         }
 
-        // 电视遥控器需要一个可见的起始焦点。
-        connectButton.post { if (!connectButton.hasFocus()) connectButton.requestFocus() }
+        // 电视遥控器需要一个可见的起始焦点，落在首页的「高级功能」上。
+        advancedButton.post { if (!advancedButton.hasFocus()) advancedButton.requestFocus() }
 
-        appendLog("提示：先在电视的开发者选项里打开「网络调试 / ADB 调试」，再填写电视 IP 连接。")
-        appendLog("首次连接会在电视上弹出授权框，用遥控器选「允许」即可。")
+        appendLog("提示：本机作为被控端，手机端安装「默默ADB」正式版后用「扫码连接」扫描上方二维码即可连接。")
+        appendLog("若提示未检测到网络 ADB，请在本机的开发者选项里打开「网络 ADB 调试」后点「刷新」。")
+        appendLog("如需把本机当作 ADB 客户端去连接其他设备，请进入「高级功能」。")
     }
 
     override fun onDestroy() {
@@ -123,6 +170,127 @@ class MainActivity : Activity() {
         connection?.close()
         connection = null
     }
+
+    override fun onBackPressed() {
+        // 高级功能页里按返回键先回首页，符合被控端「首页即门面」的使用习惯。
+        if (advancedPage.visibility == View.VISIBLE) {
+            showAdvanced(false)
+        } else {
+            super.onBackPressed()
+        }
+    }
+
+    // ---------- 首页：本机信息与二维码 ----------
+
+    private fun showAdvanced(show: Boolean) {
+        advancedPage.visibility = if (show) View.VISIBLE else View.GONE
+        homePage.visibility = if (show) View.GONE else View.VISIBLE
+        if (show) {
+            connectButton.post { if (!connectButton.hasFocus()) connectButton.requestFocus() }
+        } else {
+            advancedButton.post { if (!advancedButton.hasFocus()) advancedButton.requestFocus() }
+        }
+    }
+
+    private fun refreshHomeInfo() {
+        val generation = ++refreshGeneration
+        adbStatusView.text = getString(R.string.log_refreshing)
+        adbStatusView.setTextColor(getColorCompat(R.color.text_secondary))
+        worker.execute {
+            val ips = localIpAddresses()
+            val adbOpen = isPortOpen(AdbPort)
+            val matrix = ips.firstOrNull()?.let { runCatching { QrCode.encode("$it:$AdbPort") }.getOrNull() }
+            val bitmap = matrix?.let { renderQr(it) }
+            post {
+                if (generation != refreshGeneration || isFinishing) return@post
+                if (bitmap != null) {
+                    qrView.setImageBitmap(bitmap)
+                } else if (ips.isNotEmpty()) {
+                    appendLog(getString(R.string.log_qr_failed))
+                }
+                if (ips.isEmpty()) {
+                    infoIpView.text = getString(R.string.home_no_ip)
+                    adbStatusView.text = getString(R.string.info_no_network)
+                    adbStatusView.setTextColor(getColorCompat(R.color.status_warn))
+                    return@post
+                }
+                infoIpView.text = ips.joinToString("\n")
+                if (ips.size > 1) {
+                    appendLog(getString(R.string.log_refresh_multi_ip))
+                }
+                if (adbOpen) {
+                    adbStatusView.text = getString(R.string.adb_status_open)
+                    adbStatusView.setTextColor(getColorCompat(R.color.status_ok))
+                } else {
+                    adbStatusView.text = getString(R.string.adb_status_closed)
+                    adbStatusView.setTextColor(getColorCompat(R.color.status_warn))
+                }
+            }
+        }
+    }
+
+    /** 枚举本机所有 IPv4 局域网地址（4.4 上部分接口属性可能抛异常，逐个容错）。 */
+    private fun localIpAddresses(): List<String> {
+        val result = mutableListOf<String>()
+        try {
+            val interfaces = NetworkInterface.getNetworkInterfaces() ?: return result
+            while (interfaces.hasMoreElements()) {
+                val networkInterface = interfaces.nextElement()
+                try {
+                    if (!networkInterface.isUp || networkInterface.isLoopback) continue
+                    val addresses = networkInterface.inetAddresses
+                    while (addresses.hasMoreElements()) {
+                        val address = addresses.nextElement()
+                        if (address is Inet4Address &&
+                            !address.isLoopbackAddress &&
+                            !address.isAnyLocalAddress
+                        ) {
+                            address.hostAddress?.let { result.add(it) }
+                        }
+                    }
+                } catch (_: Throwable) {
+                    // 单个网卡属性异常时跳过该网卡。
+                }
+            }
+        } catch (_: Throwable) {
+            // 枚举接口失败时按无网络处理。
+        }
+        return result.distinct()
+    }
+
+    /** 探测本机 adbd 是否在监听网络 ADB 端口。 */
+    private fun isPortOpen(port: Int): Boolean = try {
+        Socket().use { socket ->
+            socket.connect(InetSocketAddress("127.0.0.1", port), PortProbeTimeoutMillis)
+            true
+        }
+    } catch (_: Throwable) {
+        false
+    }
+
+    /** 把模块矩阵渲染成白底二维码位图（含四周留白）。 */
+    private fun renderQr(matrix: Array<BooleanArray>): Bitmap {
+        val quiet = 4
+        val scale = 16
+        val dim = (matrix.size + quiet * 2) * scale
+        val pixels = IntArray(dim * dim) { Color.WHITE }
+        for (y in matrix.indices) {
+            for (x in matrix.indices) {
+                if (!matrix[y][x]) continue
+                val px = (x + quiet) * scale
+                val py = (y + quiet) * scale
+                for (dy in 0 until scale) {
+                    val base = (py + dy) * dim + px
+                    java.util.Arrays.fill(pixels, base, base + scale, Color.BLACK)
+                }
+            }
+        }
+        return Bitmap.createBitmap(pixels, dim, dim, Bitmap.Config.RGB_565)
+    }
+
+    private fun getColorCompat(id: Int): Int = resources.getColor(id)
+
+    // ---------- 连接 ----------
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
@@ -512,6 +680,10 @@ class MainActivity : Activity() {
         const val KeyHost = "host"
         const val KeyPort = "port"
         const val DefaultPort = 5555
+
+        /** 被控端网络 ADB 的标准端口，首页信息与二维码都围绕它展示。 */
+        const val AdbPort = 5555
+        const val PortProbeTimeoutMillis = 1500
         const val MaxLogChars = 60_000
         const val MaxPreviewWidth = 1280
         const val RequestPickApk = 1001

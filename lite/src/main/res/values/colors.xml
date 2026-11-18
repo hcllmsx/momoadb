@@ -8,4 +8,7 @@
     <color name="text_secondary">#93A0B4</color>
     <color name="accent">#3EA6FF</color>
     <color name="log_bg">#0B0E13</color>
+    <color name="qr_bg">#FFFFFF</color>
+    <color name="status_ok">#6FD68C</color>
+    <color name="status_warn">#FFB74A</color>
 </resources>

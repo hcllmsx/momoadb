@@ -102,6 +102,10 @@ dependencies {
     implementation(libs.okhttp)
     implementation(libs.okio)
     implementation(libs.timber)
+    // 扫码连接：配合轻量版被控端展示的二维码，扫出 IP:端口自动填写。
+    implementation(libs.zxing.android.embedded)
+    // 本机二维码页：生成被控端连接二维码。
+    implementation(libs.zxing.core)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.test.runner)

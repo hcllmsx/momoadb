@@ -32,6 +32,24 @@
     <string name="section_shell">Shell 命令</string>
     <string name="screenshot_title">设备截图</string>
 
+    <!-- 被控端首页 -->
+    <string name="home_section_info">本机连接信息</string>
+    <string name="advanced_title">高级功能</string>
+    <string name="action_refresh">刷新</string>
+    <string name="action_advanced">高级功能</string>
+    <string name="action_back_home">‹ 返回首页</string>
+    <string name="info_model_label">型号：</string>
+    <string name="info_port_label">ADB 端口：5555</string>
+    <string name="info_no_network">未检测到局域网 IP，请检查网线或 Wi-Fi</string>
+    <string name="adb_status_open">网络 ADB 已开启（端口 5555），手机端可直接扫码连接本机</string>
+    <string name="adb_status_closed">未检测到网络 ADB 调试（端口 5555 未开放），请在系统设置的开发者选项中打开「网络 ADB 调试」后再扫码</string>
+    <string name="qr_desc">连接本机用的二维码</string>
+    <string name="qr_caption">用手机版「默默ADB」的「扫码连接」扫描上方二维码，即可自动填写地址并连接本机；也可以手动输入上面的 IP 和端口。</string>
+    <string name="home_no_ip">未检测到本机局域网 IP</string>
+    <string name="log_refresh_multi_ip">检测到多个 IP 地址，二维码使用第一个；如不对请用手机手动输入正确的 IP。</string>
+    <string name="log_qr_failed">二维码生成失败</string>
+    <string name="log_refreshing">正在刷新本机信息…</string>
+
     <string name="apk_hint">APK 路径，例如 /sdcard/download/app.apk</string>
     <string name="remote_hint">设备上的路径，例如 /sdcard/Download/a.txt</string>
     <string name="local_hint">本机路径（留空则使用应用目录），例如 /sdcard/momoadb/a.txt</string>

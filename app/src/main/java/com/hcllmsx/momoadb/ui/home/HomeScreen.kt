@@ -1,5 +1,7 @@
 package com.hcllmsx.momoadb.ui.home
 
+import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -19,6 +21,8 @@ import androidx.compose.material.icons.outlined.AddLink
 import androidx.compose.material.icons.outlined.Cable
 import androidx.compose.material.icons.outlined.Key
 import androidx.compose.material.icons.outlined.LinkOff
+import androidx.compose.material.icons.outlined.QrCode2
+import androidx.compose.material.icons.outlined.QrCodeScanner
 import androidx.compose.material.icons.outlined.Refresh
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material.icons.outlined.Usb
@@ -41,6 +45,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -68,6 +73,8 @@ import com.hcllmsx.momoadb.ui.theme.AdbManagerTheme
 import com.hcllmsx.momoadb.ui.theme.AppDimens
 import com.hcllmsx.momoadb.usb.UsbOtgAttachment
 import com.hcllmsx.momoadb.usb.UsbOtgMode
+import com.journeyapps.barcodescanner.ScanContract
+import com.journeyapps.barcodescanner.ScanOptions
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -75,6 +82,7 @@ fun HomeScreen(
     bottomPadding: Dp = 0.dp,
     onPairingClick: () -> Unit = {},
     onDiscoveryClick: () -> Unit = {},
+    onQrDisplayClick: () -> Unit = {},
     discoveredHost: String = "",
     discoveredPort: String = "",
     onDiscoveredEndpointConsumed: () -> Unit = {},
@@ -97,6 +105,12 @@ fun HomeScreen(
         TopAppBar(
             title = { Text(text = stringResource(R.string.home_title)) },
             actions = {
+                IconButton(onClick = onQrDisplayClick) {
+                    Icon(
+                        imageVector = Icons.Outlined.QrCode2,
+                        contentDescription = stringResource(R.string.action_show_qr),
+                    )
+                }
                 if (uiState.canDisconnect) {
                     IconButton(onClick = viewModel::onDisconnectClicked) {
                         Icon(
@@ -340,6 +354,21 @@ private fun ManualConnectCard(
     val isWide = LocalWindowLayout.current.isWide
     // 电视上进入首页把焦点交给「连接」按钮，避免焦点落在输入框直接弹出软键盘。
     val connectFocus = rememberTvInitialFocus(isWide)
+    val context = LocalContext.current
+
+    // 扫码连接：扫描轻量版被控端展示的「IP:端口」二维码，识别成功后自动填写并连接。
+    val scanLauncher = rememberLauncherForActivityResult(ScanContract()) { result ->
+        val content = result.contents
+        if (content.isNullOrBlank()) return@rememberLauncherForActivityResult
+        val endpoint = parseQrEndpoint(content)
+        if (endpoint == null) {
+            Toast.makeText(context, R.string.home_scan_unrecognized, Toast.LENGTH_LONG).show()
+        } else {
+            onIpChanged(endpoint.first)
+            endpoint.second?.let(onPortChanged)
+            onConnectClick()
+        }
+    }
 
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -435,9 +464,53 @@ private fun ManualConnectCard(
                         textAlign = TextAlign.Start,
                     )
                 }
+                // 扫码是手机端的入口：电视宽屏布局没有相机，不显示。
+                if (!isWide) {
+                    TextButton(
+                        onClick = {
+                            scanLauncher.launch(
+                                ScanOptions().apply {
+                                    setDesiredBarcodeFormats(ScanOptions.QR_CODE)
+                                    setPrompt(context.getString(R.string.home_scan_prompt))
+                                    setBeepEnabled(false)
+                                    setOrientationLocked(true)
+                                },
+                            )
+                        },
+                        modifier = Modifier
+                            .weight(1f)
+                            .heightIn(min = 40.dp)
+                            .tvFocusRing(shape = ButtonDefaults.shape),
+                        contentPadding = PaddingValues(horizontal = 6.dp, vertical = 8.dp),
+                    ) {
+                        Icon(
+                            imageVector = Icons.Outlined.QrCodeScanner,
+                            contentDescription = null,
+                            modifier = Modifier.size(18.dp),
+                        )
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text(
+                            text = stringResource(R.string.action_scan_connect),
+                            maxLines = 2,
+                            overflow = TextOverflow.Ellipsis,
+                            textAlign = TextAlign.Start,
+                        )
+                    }
+                }
             }
         }
     }
+}
+
+/** 二维码内容格式：纯文本「IP:端口」，端口可省略（省略时保留当前端口）。 */
+private val QrEndpointRegex = Regex("""^\s*((?:\d{1,3}\.){3}\d{1,3})(?::(\d{1,5}))?\s*$""")
+
+private fun parseQrEndpoint(content: String): Pair<String, String?>? {
+    val match = QrEndpointRegex.find(content) ?: return null
+    val ip = match.groupValues[1]
+    if (ip.split('.').any { it.toIntOrNull() !in 0..255 }) return null
+    val port = match.groupValues[2]
+    return ip to port.ifEmpty { null }
 }
 
 @Composable

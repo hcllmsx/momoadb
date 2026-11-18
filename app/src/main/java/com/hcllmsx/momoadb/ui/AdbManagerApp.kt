@@ -66,6 +66,7 @@ import com.hcllmsx.momoadb.ui.localapps.LocalAppsScreen
 import com.hcllmsx.momoadb.ui.logs.SystemLogScreen
 import com.hcllmsx.momoadb.ui.mirror.MirrorScreen
 import com.hcllmsx.momoadb.ui.pairing.PairingScreen
+import com.hcllmsx.momoadb.ui.qrcode.DeviceQrScreen
 import com.hcllmsx.momoadb.ui.remote.RemoteControlScreen
 import com.hcllmsx.momoadb.ui.screenshot.ScreenshotScreen
 import com.hcllmsx.momoadb.ui.settings.SettingsScreen
@@ -268,6 +269,7 @@ private fun AppNavHost(
                                 bottomPadding = bottomPadding,
                                 onPairingClick = { navController.navigate(AppDestination.Pairing.route) },
                                 onDiscoveryClick = { navController.navigate(AppDestination.Discovery.route) },
+                                onQrDisplayClick = { navController.navigate(DeviceQrRoute) },
                                 discoveredHost = discoveredHost,
                                 discoveredPort = discoveredPort,
                                 onDiscoveredEndpointConsumed = {
@@ -381,6 +383,9 @@ private fun AppNavHost(
                         appComposable(DiagnosticsRoute) {
                             DiagnosticLogScreen(bottomPadding = bottomPadding, onBackClick = { navController.popBackStack() })
                         }
+                        appComposable(DeviceQrRoute) {
+                            DeviceQrScreen(bottomPadding = bottomPadding, onBackClick = { navController.popBackStack() })
+                        }
                     }
                 }
             }
@@ -433,3 +438,4 @@ private const val RemoteRoute = "remote"
 private const val MirrorRoute = "mirror"
 private const val LogsRoute = "logs"
 private const val DiagnosticsRoute = "diagnostics"
+private const val DeviceQrRoute = "device_qr"

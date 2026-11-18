@@ -11,4 +11,6 @@
     <color name="qr_bg">#FFFFFF</color>
     <color name="status_ok">#6FD68C</color>
     <color name="status_warn">#FFB74A</color>
+    <!-- 日志框内状态行上方的细分隔线 -->
+    <color name="divider">#2E93A0B4</color>
 </resources>

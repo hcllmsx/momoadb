@@ -68,6 +68,7 @@ class MainActivity : Activity() {
     private lateinit var refreshButton: Button
     private lateinit var advancedButton: Button
     private lateinit var backHomeButton: Button
+    private lateinit var headerAdvancedGroup: View
 
     /** 递增的刷新代数，用于丢弃过期的后台刷新结果。 */
     @Volatile
@@ -110,6 +111,7 @@ class MainActivity : Activity() {
         refreshButton = findViewById(R.id.btn_refresh)
         advancedButton = findViewById(R.id.btn_advanced)
         backHomeButton = findViewById(R.id.btn_back_home)
+        headerAdvancedGroup = findViewById(R.id.header_advanced_group)
 
         val prefs = getSharedPreferences(PrefsName, Context.MODE_PRIVATE)
         hostInput.setText(prefs.getString(KeyHost, ""))
@@ -185,6 +187,11 @@ class MainActivity : Activity() {
     private fun showAdvanced(show: Boolean) {
         advancedPage.visibility = if (show) View.VISIBLE else View.GONE
         homePage.visibility = if (show) View.GONE else View.VISIBLE
+        // 标题栏右侧：首页显示「刷新 / 高级功能」，高级页换成「返回首页 + 页面标题」。
+        val homeEntryVisibility = if (show) View.GONE else View.VISIBLE
+        refreshButton.visibility = homeEntryVisibility
+        advancedButton.visibility = homeEntryVisibility
+        headerAdvancedGroup.visibility = if (show) View.VISIBLE else View.GONE
         if (show) {
             connectButton.post { if (!connectButton.hasFocus()) connectButton.requestFocus() }
         } else {

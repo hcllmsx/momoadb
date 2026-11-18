@@ -13,6 +13,88 @@
     android:orientation="vertical"
     android:padding="24dp">
 
+    <!-- 页头：左侧标题与副标题，右上角固定「刷新」「高级功能」两个入口 -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/title"
+                android:textColor="@color/text_primary"
+                android:textSize="26sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/subtitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:text="@string/subtitle"
+                android:textColor="@color/text_secondary"
+                android:textSize="14sp" />
+        </LinearLayout>
+
+        <Button
+            android:id="@+id/btn_refresh"
+            android:layout_width="130dp"
+            android:layout_height="52dp"
+            android:background="@drawable/field_bg"
+            android:focusable="true"
+            android:text="@string/action_refresh"
+            android:textColor="@color/text_primary"
+            android:textSize="17sp" />
+
+        <Button
+            android:id="@+id/btn_advanced"
+            android:layout_width="160dp"
+            android:layout_height="52dp"
+            android:layout_marginLeft="10dp"
+            android:background="@drawable/field_bg"
+            android:focusable="true"
+            android:text="@string/action_advanced"
+            android:textColor="@color/text_primary"
+            android:textSize="17sp" />
+
+        <!-- 高级功能页：标题栏右侧改为「返回首页」+ 页面标题，与首页两个入口互斥显示 -->
+        <LinearLayout
+            android:id="@+id/header_advanced_group"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:visibility="gone">
+
+            <Button
+                android:id="@+id/btn_back_home"
+                android:layout_width="140dp"
+                android:layout_height="52dp"
+                android:background="@drawable/field_bg"
+                android:focusable="true"
+                android:text="@string/action_back_home"
+                android:textColor="@color/text_primary"
+                android:textSize="17sp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingLeft="12dp"
+                android:text="@string/advanced_title"
+                android:textColor="@color/text_primary"
+                android:textSize="20sp"
+                android:textStyle="bold" />
+        </LinearLayout>
+    </LinearLayout>
+
     <FrameLayout
         android:id="@+id/page_host"
         android:layout_width="match_parent"
@@ -30,23 +112,6 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/title"
-                    android:textColor="@color/text_primary"
-                    android:textSize="26sp"
-                    android:textStyle="bold" />
-
-                <TextView
-                    android:id="@+id/subtitle"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="4dp"
-                    android:text="@string/subtitle"
-                    android:textColor="@color/text_secondary"
-                    android:textSize="14sp" />
 
                 <TextView
                     style="@style/SectionTitle"
@@ -123,36 +188,6 @@
                     android:text="@string/qr_caption"
                     android:textColor="@color/text_secondary"
                     android:textSize="14sp" />
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="16dp"
-                    android:orientation="horizontal">
-
-                    <Button
-                        android:id="@+id/btn_refresh"
-                        android:layout_width="0dp"
-                        android:layout_height="56dp"
-                        android:layout_weight="1"
-                        android:background="@drawable/field_bg"
-                        android:focusable="true"
-                        android:text="@string/action_refresh"
-                        android:textColor="@color/text_primary"
-                        android:textSize="18sp" />
-
-                    <Button
-                        android:id="@+id/btn_advanced"
-                        android:layout_width="0dp"
-                        android:layout_height="56dp"
-                        android:layout_marginLeft="10dp"
-                        android:layout_weight="1"
-                        android:background="@drawable/field_bg"
-                        android:focusable="true"
-                        android:text="@string/action_advanced"
-                        android:textColor="@color/text_primary"
-                        android:textSize="18sp" />
-                </LinearLayout>
             </LinearLayout>
         </ScrollView>
 
@@ -169,38 +204,11 @@
                 android:layout_height="wrap_content"
                 android:orientation="vertical">
 
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal">
-
-                    <Button
-                        android:id="@+id/btn_back_home"
-                        android:layout_width="140dp"
-                        android:layout_height="52dp"
-                        android:background="@drawable/field_bg"
-                        android:focusable="true"
-                        android:text="@string/action_back_home"
-                        android:textColor="@color/text_primary"
-                        android:textSize="17sp" />
-
-                    <TextView
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:gravity="center_vertical"
-                        android:paddingLeft="12dp"
-                        android:text="@string/advanced_title"
-                        android:textColor="@color/text_primary"
-                        android:textSize="20sp"
-                        android:textStyle="bold" />
-                </LinearLayout>
-
                 <!-- 连接 -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="16dp"
+                    android:layout_marginTop="8dp"
                     android:orientation="horizontal">
 
                     <EditText
@@ -564,33 +572,49 @@
         </ScrollView>
     </FrameLayout>
 
-    <!-- 日志区：两页共用，始终显示在底部 -->
-    <ScrollView
-        android:id="@+id/log_scroll"
+    <!-- 日志区：两页共用，始终显示在底部；状态行并进框内底部，不再单独占一行 -->
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="170dp"
+        android:layout_height="120dp"
         android:layout_marginTop="10dp"
         android:background="@drawable/log_bg"
-        android:fadeScrollbars="false"
-        android:focusable="true"
-        android:padding="12dp">
+        android:orientation="vertical"
+        android:padding="10dp">
+
+        <ScrollView
+            android:id="@+id/log_scroll"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:background="@drawable/log_bg"
+            android:fadeScrollbars="false"
+            android:focusable="true">
+
+            <TextView
+                android:id="@+id/output"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:fontFamily="monospace"
+                android:textColor="@color/text_primary"
+                android:textIsSelectable="false"
+                android:textSize="14sp" />
+        </ScrollView>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginTop="6dp"
+            android:background="@color/divider" />
 
         <TextView
-            android:id="@+id/output"
+            android:id="@+id/status"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:fontFamily="monospace"
-            android:textColor="@color/text_primary"
-            android:textIsSelectable="false"
-            android:textSize="14sp" />
-    </ScrollView>
-
-    <TextView
-        android:id="@+id/status"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:text="@string/status_ready"
-        android:textColor="@color/accent"
-        android:textSize="14sp" />
+            android:layout_marginTop="4dp"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:text="@string/status_ready"
+            android:textColor="@color/accent"
+            android:textSize="13sp" />
+    </LinearLayout>
 </LinearLayout>

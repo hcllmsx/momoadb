@@ -70,6 +70,13 @@
                 android:name="android.hardware.usb.action.USB_DEVICE_ATTACHED"
                 android:resource="@xml/usb_device_filter" />
         </activity>
+
+        <!-- 覆盖 zxing-embedded 的 CaptureActivity 方向：库默认 sensorLandscape，
+             导致手机扫码总是横屏；扫码入口只在手机竖屏布局展示，这里锁定竖屏。 -->
+        <activity
+            android:name="com.journeyapps.barcodescanner.CaptureActivity"
+            android:screenOrientation="portrait"
+            tools:replace="android:screenOrientation" />
     </application>
 
 </manifest>

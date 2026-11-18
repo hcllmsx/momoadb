@@ -474,6 +474,7 @@ private fun ManualConnectCard(
                                     setDesiredBarcodeFormats(ScanOptions.QR_CODE)
                                     setPrompt(scanPrompt)
                                     setBeepEnabled(false)
+                                    // CaptureActivity 方向已在清单覆盖为竖屏（库默认 sensorLandscape），保持锁定。
                                     setOrientationLocked(true)
                                 },
                             )

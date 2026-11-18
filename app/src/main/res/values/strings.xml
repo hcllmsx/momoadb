@@ -63,6 +63,9 @@
     <string name="settings_check_update_latest">Already up to date (%1$s)</string>
     <string name="settings_check_update_available">Version %1$s is available, tap to download</string>
     <string name="settings_check_update_failed">Update check failed, please visit the Releases page</string>
+    <string name="update_banner_title">New version %1$s available</string>
+    <string name="update_banner_download">Download</string>
+    <string name="update_banner_dismiss">Dismiss the update banner</string>
 
     <!-- Home screen -->
     <string name="home_title">Device connection</string>
@@ -78,7 +81,7 @@
     <string name="action_wireless_pairing">Pair</string>
     <string name="action_discover_devices">Discover</string>
     <string name="action_scan_connect">Scan QR</string>
-    <string name="home_scan_prompt">Align the QR code shown on the TV within the frame</string>
+    <string name="home_scan_prompt">Align the QR code shown on the other device within the frame</string>
     <string name="home_scan_unrecognized">Unrecognized QR content. Enter the IP and port manually.</string>
     <string name="action_show_qr">Show QR code</string>
     <string name="qr_screen_title">Device QR code</string>

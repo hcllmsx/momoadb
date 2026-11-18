@@ -2,4 +2,7 @@
 <resources>
     <!-- Matches Compose light surface to reduce locale-switch flash. -->
     <color name="window_background">#FFFBFCFF</color>
+
+    <!-- 扫码页提示文本的半透明底色，保证在相机画面上可读（覆盖 zxing 布局使用）。 -->
+    <color name="zxing_status_bg">#B3000000</color>
 </resources>

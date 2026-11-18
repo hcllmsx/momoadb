@@ -9,6 +9,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import java.util.concurrent.atomic.AtomicBoolean
+import java.util.concurrent.atomic.AtomicReference
 
 /**
  * 应用级的更新检查入口：启动时静默检查一次，失败不打扰用户；
@@ -22,6 +23,11 @@ object UpdateCenter {
     private val _state = MutableStateFlow<UpdateCheckState>(UpdateCheckState.Idle)
     private var running: Job? = null
 
+    /** 横幅展示的可用更新；用户关闭后记住版本号，同版本不再打扰，新版本号会重新显示。 */
+    private val dismissedVersion = AtomicReference<String?>(null)
+    private val _banner = MutableStateFlow<UpdateCheckState.Available?>(null)
+    val banner: StateFlow<UpdateCheckState.Available?> = _banner.asStateFlow()
+
     val state: StateFlow<UpdateCheckState> = _state.asStateFlow()
 
     /** 应用启动时调用，只生效一次。 */
@@ -33,6 +39,11 @@ object UpdateCenter {
     fun refresh() {
         manualRequested.set(true)
         launchCheck()
+    }
+
+    fun dismissBanner() {
+        _banner.value?.let { available -> dismissedVersion.set(available.latestVersion) }
+        _banner.value = null
     }
 
     private fun launchCheck() {
@@ -48,6 +59,9 @@ object UpdateCenter {
                     } else {
                         result
                     }
+                _banner.value =
+                    (result as? UpdateCheckState.Available)
+                        ?.takeIf { it.latestVersion != dismissedVersion.get() }
             }
     }
 }

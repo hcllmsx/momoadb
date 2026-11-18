@@ -9,6 +9,7 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
@@ -75,6 +76,7 @@ import com.hcllmsx.momoadb.ui.shared.SharedMotion
 import com.hcllmsx.momoadb.ui.shared.SharedToolKeys
 import com.hcllmsx.momoadb.ui.shared.appComposable
 import com.hcllmsx.momoadb.ui.shell.ShellScreen
+import com.hcllmsx.momoadb.ui.update.UpdateBanner
 
 @Composable
 fun AdbManagerApp() {
@@ -94,78 +96,85 @@ private fun AppShell(isWide: Boolean) {
 
     if (isWide) {
         // 电视 / 平板：左侧导航栏替代底部栏，内容限宽居中，避免手机上被横向拉伸的观感。
-        Row(modifier = Modifier.fillMaxSize()) {
-            AppNavigationRail(
-                navController = navController,
-                currentDestination = currentDestination,
-            )
-            AppNavHost(
-                navController = navController,
-                bottomRoutes = bottomRoutes,
-                bottomPadding = 0.dp,
-                modifier = Modifier.weight(1f),
-            )
+        Column(modifier = Modifier.fillMaxSize()) {
+            UpdateBanner()
+            Row(modifier = Modifier.weight(1f)) {
+                AppNavigationRail(
+                    navController = navController,
+                    currentDestination = currentDestination,
+                )
+                AppNavHost(
+                    navController = navController,
+                    bottomRoutes = bottomRoutes,
+                    bottomPadding = 0.dp,
+                    modifier = Modifier.weight(1f),
+                )
+            }
         }
         return
     }
 
-    Scaffold(
-        contentWindowInsets = WindowInsets(0, 0, 0, 0),
-        containerColor = MaterialTheme.colorScheme.surface,
-        bottomBar = {
-            AnimatedVisibility(
-                visible = showBottomBar,
-                enter = expandVertically(
-                    animationSpec = SharedMotion.sizeTween(),
-                    expandFrom = Alignment.Bottom,
-                ) + fadeIn(animationSpec = tween(SharedMotion.FadeMs)),
-                exit = shrinkVertically(
-                    animationSpec = SharedMotion.sizeTween(),
-                    shrinkTowards = Alignment.Bottom,
-                ) + fadeOut(animationSpec = tween(SharedMotion.FadeMs)),
-            ) {
-                NavigationBar(
-                    containerColor = MaterialTheme.colorScheme.surfaceContainer,
-                    contentColor = MaterialTheme.colorScheme.onSurface,
-                    tonalElevation = 0.dp,
-                    windowInsets = WindowInsets.navigationBars,
+    Column(modifier = Modifier.fillMaxSize()) {
+        UpdateBanner()
+        Scaffold(
+            modifier = Modifier.weight(1f),
+            contentWindowInsets = WindowInsets(0, 0, 0, 0),
+            containerColor = MaterialTheme.colorScheme.surface,
+            bottomBar = {
+                AnimatedVisibility(
+                    visible = showBottomBar,
+                    enter = expandVertically(
+                        animationSpec = SharedMotion.sizeTween(),
+                        expandFrom = Alignment.Bottom,
+                    ) + fadeIn(animationSpec = tween(SharedMotion.FadeMs)),
+                    exit = shrinkVertically(
+                        animationSpec = SharedMotion.sizeTween(),
+                        shrinkTowards = Alignment.Bottom,
+                    ) + fadeOut(animationSpec = tween(SharedMotion.FadeMs)),
                 ) {
-                    bottomDestinations.forEach { destination ->
-                        val selected = currentDestination?.hierarchy?.any { it.route == destination.route } == true
-                        val label = stringResource(destination.labelRes)
-                        NavigationBarItem(
-                            selected = selected,
-                            onClick = { navController.navigateToTab(destination.route) },
-                            icon = {
-                                Icon(
-                                    imageVector = destination.icon,
-                                    contentDescription = label,
-                                )
-                            },
-                            label = { Text(label) },
-                            colors = NavigationBarItemDefaults.colors(
-                                selectedIconColor = MaterialTheme.colorScheme.onPrimary,
-                                selectedTextColor = MaterialTheme.colorScheme.primary,
-                                indicatorColor = MaterialTheme.colorScheme.primary,
-                                unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                                unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                            ),
-                        )
+                    NavigationBar(
+                        containerColor = MaterialTheme.colorScheme.surfaceContainer,
+                        contentColor = MaterialTheme.colorScheme.onSurface,
+                        tonalElevation = 0.dp,
+                        windowInsets = WindowInsets.navigationBars,
+                    ) {
+                        bottomDestinations.forEach { destination ->
+                            val selected = currentDestination?.hierarchy?.any { it.route == destination.route } == true
+                            val label = stringResource(destination.labelRes)
+                            NavigationBarItem(
+                                selected = selected,
+                                onClick = { navController.navigateToTab(destination.route) },
+                                icon = {
+                                    Icon(
+                                        imageVector = destination.icon,
+                                        contentDescription = label,
+                                    )
+                                },
+                                label = { Text(label) },
+                                colors = NavigationBarItemDefaults.colors(
+                                    selectedIconColor = MaterialTheme.colorScheme.onPrimary,
+                                    selectedTextColor = MaterialTheme.colorScheme.primary,
+                                    indicatorColor = MaterialTheme.colorScheme.primary,
+                                    unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                                ),
+                            )
+                        }
                     }
                 }
-            }
-        },
-    ) { padding ->
-        val systemNavBottom = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
-        // 收起过程中 Scaffold 底边距连续变化；始终不低于系统导航区，避免手势条穿透。
-        val bottomPadding = maxOf(padding.calculateBottomPadding(), systemNavBottom)
+            },
+        ) { padding ->
+            val systemNavBottom = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
+            // 收起过程中 Scaffold 底边距连续变化；始终不低于系统导航区，避免手势条穿透。
+            val bottomPadding = maxOf(padding.calculateBottomPadding(), systemNavBottom)
 
-        AppNavHost(
-            navController = navController,
-            bottomRoutes = bottomRoutes,
-            bottomPadding = bottomPadding,
-            modifier = Modifier.fillMaxSize(),
-        )
+            AppNavHost(
+                navController = navController,
+                bottomRoutes = bottomRoutes,
+                bottomPadding = bottomPadding,
+                modifier = Modifier.fillMaxSize(),
+            )
+        }
     }
 }
 

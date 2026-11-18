@@ -63,6 +63,9 @@
     <string name="settings_check_update_latest">已是最新版本（%1$s）</string>
     <string name="settings_check_update_available">发现新版本 %1$s，点击前往下载</string>
     <string name="settings_check_update_failed">检查更新失败，请前往 Release 页面查看最新版本</string>
+    <string name="update_banner_title">发现新版本 %1$s</string>
+    <string name="update_banner_download">前往下载</string>
+    <string name="update_banner_dismiss">关闭更新提示</string>
 
     <!-- Home screen -->
     <string name="home_title">设备连接</string>
@@ -78,7 +81,7 @@
     <string name="action_wireless_pairing">无线配对</string>
     <string name="action_discover_devices">发现设备</string>
     <string name="action_scan_connect">扫码连接</string>
-    <string name="home_scan_prompt">将电视上的二维码对准取景框</string>
+    <string name="home_scan_prompt">将另一个设备上的二维码对准取景框</string>
     <string name="home_scan_unrecognized">未识别的二维码内容，请手动输入 IP 和端口</string>
     <string name="action_show_qr">显示二维码</string>
     <string name="qr_screen_title">本机连接二维码</string>

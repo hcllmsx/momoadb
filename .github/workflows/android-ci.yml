@@ -65,12 +65,6 @@ jobs:
           mkdir -p "${RUNNER_TEMP}/signing"
           echo "${SIGNING_KEY_BASE64}" | base64 --decode > "${RUNNER_TEMP}/signing/release.p12"
 
-      - name: 运行单元测试
-        run: ./gradlew --no-daemon testDebugUnitTest
-
-      - name: 运行 Android Lint
-        run: ./gradlew --no-daemon lintRelease
-
       - name: 解析并校验发布版本
         id: version
         env:

@@ -466,12 +466,13 @@ private fun ManualConnectCard(
                 }
                 // 扫码是手机端的入口：电视宽屏布局没有相机，不显示。
                 if (!isWide) {
+                    val scanPrompt = stringResource(R.string.home_scan_prompt)
                     TextButton(
                         onClick = {
                             scanLauncher.launch(
                                 ScanOptions().apply {
                                     setDesiredBarcodeFormats(ScanOptions.QR_CODE)
-                                    setPrompt(context.getString(R.string.home_scan_prompt))
+                                    setPrompt(scanPrompt)
                                     setBeepEnabled(false)
                                     setOrientationLocked(true)
                                 },
